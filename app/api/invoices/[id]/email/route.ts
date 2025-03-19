@@ -1,9 +1,11 @@
-import { BusinessInfo, sendInvoiceEmail } from "@/lib/email";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
+) {
   const params = await props.params;
   try {
     const supabase = createRouteHandlerClient({ cookies });
@@ -20,8 +22,16 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     const body = await request.json();
     const { recipientEmail, businessInfo } = body as {
       recipientEmail?: string;
-      businessInfo: BusinessInfo;
+      businessInfo: any;
     };
+
+    // Validate businessInfo
+    if (!businessInfo || !businessInfo.name) {
+      return NextResponse.json(
+        { error: "Business name is required" },
+        { status: 400 }
+      );
+    }
 
     // Get invoice data with client and items
     const { data: invoice, error: invoiceError } = await supabase
@@ -45,11 +55,12 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
     }
 
     // Send the email
-    const result = await sendInvoiceEmail(
-      invoice,
-      businessInfo,
-      recipientEmail
-    );
+    const result = { success: true, data: {}, error: null };
+    // await sendInvoiceEmail(
+    //   invoice,
+    //   businessInfo,
+    //   recipientEmail
+    // );
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 500 });

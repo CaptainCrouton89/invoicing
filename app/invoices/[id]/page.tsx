@@ -12,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BusinessInfo } from "@/lib/email";
 import { Client, Invoice, InvoiceItem } from "@/lib/types";
 import { formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
@@ -35,7 +34,7 @@ export default function InvoiceDetailPage() {
   const [invoice, setInvoice] = useState<EnhancedInvoice | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [businessInfo, setBusinessInfo] = useState<BusinessInfo>({
+  const [businessInfo, setBusinessInfo] = useState<any>({
     name: "Your Business Name",
     address: "123 Business St, City, Country",
     phone: "+1 234 567 890",
@@ -228,7 +227,7 @@ export default function InvoiceDetailPage() {
             size="default"
           />
 
-          <Button onClick={handleSendEmail} disabled={isSending}>
+          {/* <Button onClick={handleSendEmail} disabled={isSending}>
             {isSending ? (
               <>
                 <svg
@@ -256,7 +255,7 @@ export default function InvoiceDetailPage() {
             ) : (
               "Send Email"
             )}
-          </Button>
+          </Button> */}
 
           <InvoiceDownloadButton
             invoice={invoice}
