@@ -1,5 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -177,64 +185,65 @@ export default function DashboardQuickInvoice() {
   }
 
   return (
-    <div className="p-4">
-      <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="clientSelect"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Select Client
-          </label>
-          <select
-            id="clientSelect"
-            value={selectedClientId}
-            onChange={(e) => setSelectedClientId(e.target.value)}
-            className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            disabled={isCreating}
-          >
-            <option value="" disabled>
-              Select a client
-            </option>
-            {frequentClients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-lg">Quick Invoice</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="clientSelect"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Select Client
+            </label>
+            <select
+              id="clientSelect"
+              value={selectedClientId}
+              onChange={(e) => setSelectedClientId(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              disabled={isCreating}
+            >
+              <option value="" disabled>
+                Select a client
               </option>
-            ))}
-          </select>
-        </div>
+              {frequentClients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <button
-          onClick={handleCreateInvoice}
-          disabled={!selectedClientId || isCreating}
-          className={`w-full py-2 px-4 rounded-md text-white transition-colors ${
-            !selectedClientId || isCreating
-              ? "bg-blue-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {isCreating ? (
-            <div className="flex items-center justify-center">
-              <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
-              Creating...
-            </div>
-          ) : (
-            "Create Invoice"
-          )}
-        </button>
-
-        <div className="text-center border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            Need more options?
-          </p>
-          <button
-            onClick={() => router.push("/invoices/new")}
-            className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+          <Button
+            onClick={handleCreateInvoice}
+            disabled={!selectedClientId || isCreating}
+            className="w-full"
+            variant={!selectedClientId || isCreating ? "secondary" : "default"}
           >
-            Create Detailed Invoice →
-          </button>
+            {isCreating ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
+                Creating...
+              </div>
+            ) : (
+              "Create Invoice"
+            )}
+          </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+      <CardFooter className="flex flex-col border-t border-gray-200 dark:border-gray-700 pt-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          Need more options?
+        </p>
+        <button
+          onClick={() => router.push("/invoices/new")}
+          className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+        >
+          Create Detailed Invoice →
+        </button>
+      </CardFooter>
+    </Card>
   );
 }

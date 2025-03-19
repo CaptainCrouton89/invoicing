@@ -3,6 +3,7 @@ import DashboardFinancialSummary from "@/components/dashboard/DashboardFinancial
 import DashboardFrequentClients from "@/components/dashboard/DashboardFrequentClients";
 import DashboardInvoiceManagement from "@/components/dashboard/DashboardInvoiceManagement";
 import DashboardQuickInvoice from "@/components/dashboard/DashboardQuickInvoice";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 
 export default async function DashboardPage() {
@@ -14,75 +15,75 @@ export default async function DashboardPage() {
         {/* Left Column (2/3 width on large screens) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Action Alerts Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="font-medium text-lg">Action Needed</h2>
-            </div>
-            <Suspense
-              fallback={
-                <div className="p-6 text-center">Loading alerts...</div>
-              }
-            >
-              <DashboardActionAlerts />
-            </Suspense>
-          </section>
+          <Card>
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle>Action Needed</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Suspense
+                fallback={
+                  <div className="p-6 text-center">Loading alerts...</div>
+                }
+              >
+                <DashboardActionAlerts />
+              </Suspense>
+            </CardContent>
+          </Card>
 
           {/* Invoice Management Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="font-medium text-lg">Recent Invoices</h2>
-            </div>
-            <Suspense
-              fallback={
-                <div className="p-6 text-center">Loading invoices...</div>
-              }
-            >
-              <DashboardInvoiceManagement />
-            </Suspense>
-          </section>
+          <Card>
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle>Recent Invoices</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Suspense
+                fallback={
+                  <div className="p-6 text-center">Loading invoices...</div>
+                }
+              >
+                <DashboardInvoiceManagement />
+              </Suspense>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Column (1/3 width on large screens) */}
         <div className="space-y-6">
-          {/* Quick Invoice Creation Widget */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="font-medium text-lg">Quick Invoice</h2>
-            </div>
-            <Suspense
-              fallback={<div className="p-6 text-center">Loading...</div>}
-            >
-              <DashboardQuickInvoice />
-            </Suspense>
-          </section>
+          <DashboardQuickInvoice />
 
           {/* Frequent Clients Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="font-medium text-lg">Frequent Clients</h2>
-            </div>
-            <Suspense
-              fallback={
-                <div className="p-6 text-center">Loading clients...</div>
-              }
-            >
-              <DashboardFrequentClients />
-            </Suspense>
-          </section>
+          <Card>
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle>Frequent Clients</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Suspense
+                fallback={
+                  <div className="p-6 text-center">Loading clients...</div>
+                }
+              >
+                <DashboardFrequentClients />
+              </Suspense>
+            </CardContent>
+          </Card>
 
           {/* Financial Summary Section */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="font-medium text-lg">Financial Summary</h2>
-            </div>
-            <Suspense
-              fallback={
-                <div className="p-6 text-center">Loading financial data...</div>
-              }
-            >
-              <DashboardFinancialSummary />
-            </Suspense>
-          </section>
+          <Card>
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle>Financial Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Suspense
+                fallback={
+                  <div className="p-6 text-center">
+                    Loading financial data...
+                  </div>
+                }
+              >
+                <DashboardFinancialSummary />
+              </Suspense>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

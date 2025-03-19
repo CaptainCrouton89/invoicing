@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
@@ -256,44 +257,45 @@ export default function DashboardActionAlerts() {
           </h3>
           <div className="space-y-3">
             {alerts.overdue.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg"
-              >
-                <div className="mb-2 sm:mb-0">
-                  <Link
-                    href={`/invoices/${invoice.id}`}
-                    className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {invoice.invoice_number}
-                  </Link>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {invoice.client_name} •{" "}
-                    {formatCurrency(invoice.total_amount)}
-                  </p>
-                  <p className="text-sm text-red-600 dark:text-red-400">
-                    <span className="font-medium">
-                      {invoice.days_overdue}{" "}
-                      {invoice.days_overdue === 1 ? "day" : "days"} overdue
-                    </span>{" "}
-                    (Due: {formatDate(invoice.due_date)})
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleMarkAsPaid(invoice.id)}
-                    className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Mark Paid
-                  </button>
-                  <button
-                    onClick={() => handleSendReminder(invoice.id)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Send Reminder
-                  </button>
-                </div>
-              </div>
+              <Card key={invoice.id} className="bg-red-50 dark:bg-red-900/20">
+                <CardContent className="p-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div className="mb-2 sm:mb-0">
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {invoice.invoice_number}
+                      </Link>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {invoice.client_name} •{" "}
+                        {formatCurrency(invoice.total_amount)}
+                      </p>
+                      <p className="text-sm text-red-600 dark:text-red-400">
+                        <span className="font-medium">
+                          {invoice.days_overdue}{" "}
+                          {invoice.days_overdue === 1 ? "day" : "days"} overdue
+                        </span>{" "}
+                        (Due: {formatDate(invoice.due_date)})
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleMarkAsPaid(invoice.id)}
+                        className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded"
+                      >
+                        Mark Paid
+                      </button>
+                      <button
+                        onClick={() => handleSendReminder(invoice.id)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded"
+                      >
+                        Send Reminder
+                      </button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -307,31 +309,35 @@ export default function DashboardActionAlerts() {
           </h3>
           <div className="space-y-3">
             {alerts.draftInvoices.map((invoice) => (
-              <div
+              <Card
                 key={invoice.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg"
+                className="bg-amber-50 dark:bg-amber-900/20"
               >
-                <div className="mb-2 sm:mb-0">
-                  <Link
-                    href={`/invoices/${invoice.id}`}
-                    className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {invoice.invoice_number}
-                  </Link>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {invoice.client_name} •{" "}
-                    {formatCurrency(invoice.total_amount)}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    href={`/invoices/${invoice.id}/edit`}
-                    className="bg-amber-500 hover:bg-amber-600 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Finalize
-                  </Link>
-                </div>
-              </div>
+                <CardContent className="p-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div className="mb-2 sm:mb-0">
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {invoice.invoice_number}
+                      </Link>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {invoice.client_name} •{" "}
+                        {formatCurrency(invoice.total_amount)}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/invoices/${invoice.id}/edit`}
+                        className="bg-amber-500 hover:bg-amber-600 text-white text-sm px-3 py-1 rounded"
+                      >
+                        Finalize
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -345,38 +351,41 @@ export default function DashboardActionAlerts() {
           </h3>
           <div className="space-y-3">
             {alerts.upcomingDue.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
-              >
-                <div className="mb-2 sm:mb-0">
-                  <Link
-                    href={`/invoices/${invoice.id}`}
-                    className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {invoice.invoice_number}
-                  </Link>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {invoice.client_name} •{" "}
-                    {formatCurrency(invoice.total_amount)}
-                  </p>
-                  <p className="text-sm">Due: {formatDate(invoice.due_date)}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleMarkAsPaid(invoice.id)}
-                    className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Mark Paid
-                  </button>
-                  <button
-                    onClick={() => handleSendReminder(invoice.id)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Send Reminder
-                  </button>
-                </div>
-              </div>
+              <Card key={invoice.id} className="bg-blue-50 dark:bg-blue-900/20">
+                <CardContent className="p-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                    <div className="mb-2 sm:mb-0">
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        {invoice.invoice_number}
+                      </Link>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {invoice.client_name} •{" "}
+                        {formatCurrency(invoice.total_amount)}
+                      </p>
+                      <p className="text-sm">
+                        Due: {formatDate(invoice.due_date)}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleMarkAsPaid(invoice.id)}
+                        className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded"
+                      >
+                        Mark Paid
+                      </button>
+                      <button
+                        onClick={() => handleSendReminder(invoice.id)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded"
+                      >
+                        Send Reminder
+                      </button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

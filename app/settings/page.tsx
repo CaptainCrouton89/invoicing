@@ -1,23 +1,37 @@
 "use client";
 
 import SettingsForm from "@/components/SettingsForm";
+import { Card, CardContent } from "@/components/ui/card";
 import { Settings } from "@/lib/types";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function SettingsPage() {
+  const { supabase, user } = useSupabase();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await fetch("/api/settings");
-        if (!response.ok) {
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("settings")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error && error.code !== "PGRST116") {
+          // PGRST116 means no rows returned
           throw new Error("Failed to fetch settings");
         }
-        const data = await response.json();
-        setSettings(data);
+
+        setSettings(data || null);
       } catch (error) {
         console.error("Error fetching settings:", error);
         toast.error("Error loading settings");
@@ -27,7 +41,7 @@ export default function SettingsPage() {
     }
 
     fetchSettings();
-  }, []);
+  }, [supabase, user]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -47,17 +61,19 @@ export default function SettingsPage() {
       ) : settings ? (
         <SettingsForm initialSettings={settings} />
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <p className="text-red-500 mb-4">
-            Failed to load settings. Please try again.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Refresh Page
-          </button>
-        </div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-red-500 mb-4">
+              Failed to load settings. Please try again.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Refresh Page
+            </button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
@@ -133,58 +134,68 @@ export default function DashboardFinancialSummary() {
   return (
     <div className="p-4">
       <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            Outstanding
-          </p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {formatCurrency(summary.outstanding)}
-          </p>
-        </div>
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            Overdue
-          </p>
-          <p className="text-lg font-semibold text-red-600 dark:text-red-400">
-            {formatCurrency(summary.overdue)}
-          </p>
-        </div>
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            Last 30 days
-          </p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {formatCurrency(summary.paid_last_30_days)}
-          </p>
-        </div>
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            Last 90 days
-          </p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {formatCurrency(summary.paid_last_90_days)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="flex justify-between items-center">
-          <div>
+        <Card>
+          <CardContent className="p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-              This Year
+              Outstanding
             </p>
             <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {formatCurrency(summary.total_this_year)}
+              {formatCurrency(summary.outstanding)}
             </p>
-          </div>
-          <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-            <p className="text-xs text-gray-600 dark:text-gray-300">
-              <span className="font-medium">Drafts:</span>{" "}
-              {formatCurrency(summary.draft_total)}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              Overdue
             </p>
-          </div>
-        </div>
+            <p className="text-lg font-semibold text-red-600 dark:text-red-400">
+              {formatCurrency(summary.overdue)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              Last 30 days
+            </p>
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {formatCurrency(summary.paid_last_30_days)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+              Last 90 days
+            </p>
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {formatCurrency(summary.paid_last_90_days)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      <Card className="mt-4">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                This Year
+              </p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {formatCurrency(summary.total_this_year)}
+              </p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
+              <p className="text-xs text-gray-600 dark:text-gray-300">
+                <span className="font-medium">Drafts:</span>{" "}
+                {formatCurrency(summary.draft_total)}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
