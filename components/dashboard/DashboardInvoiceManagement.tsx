@@ -2,6 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Table,
   TableBody,
   TableCell,
@@ -11,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
+import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -223,46 +229,28 @@ export default function DashboardInvoiceManagement() {
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end space-x-2">
-                    <div className="relative">
+                  <Popover>
+                    <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                        onClick={() => {
-                          const dropdown = document.getElementById(
-                            `dropdown-${invoice.id}`
-                          );
-                          if (dropdown) {
-                            dropdown.classList.toggle("hidden");
-                          }
-                        }}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                        </svg>
+                        <MoreHorizontal className="h-4 w-4" />
                       </Button>
-                      <div
-                        id={`dropdown-${invoice.id}`}
-                        className="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 py-1"
-                      >
-                        <Link
-                          href={`/invoices/${invoice.id}`}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-                        >
-                          View Details
-                        </Link>
-                        <Link
-                          href={`/invoices/${invoice.id}/edit`}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-                        >
-                          Edit Invoice
-                        </Link>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-32 px-1 py-0" align="end">
+                      <div className="flex flex-col py-1">
+                        <Button variant="ghost" size="sm">
+                          <Link href={`/invoices/${invoice.id}`}>
+                            View Details
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Link href={`/invoices/${invoice.id}/edit`}>
+                            Edit Invoice
+                          </Link>
+                        </Button>
                         {invoice.status !== "paid" && (
                           <Button
                             onClick={() =>
@@ -270,7 +258,6 @@ export default function DashboardInvoiceManagement() {
                             }
                             variant="ghost"
                             size="sm"
-                            className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-none"
                             disabled={isUpdating === invoice.id}
                           >
                             {isUpdating === invoice.id
@@ -286,7 +273,6 @@ export default function DashboardInvoiceManagement() {
                               }
                               variant="ghost"
                               size="sm"
-                              className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-none"
                               disabled={isUpdating === invoice.id}
                             >
                               {isUpdating === invoice.id
@@ -298,13 +284,12 @@ export default function DashboardInvoiceManagement() {
                           onClick={() => handleSendEmail(invoice.id)}
                           variant="ghost"
                           size="sm"
-                          className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-none"
                         >
                           Send Email
                         </Button>
                       </div>
-                    </div>
-                  </div>
+                    </PopoverContent>
+                  </Popover>
                 </TableCell>
               </TableRow>
             ))}
