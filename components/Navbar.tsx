@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useUser } from "@/utils/supabase/use-user";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,7 +14,7 @@ import HeaderAuth from "./header-auth";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user } = useUser();
+  const { user } = useSupabase();
 
   const isActiveLink = (path: string) => {
     return pathname.startsWith(path);

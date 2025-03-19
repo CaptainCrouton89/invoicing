@@ -2,7 +2,7 @@
 
 import { signOutAction } from "@/app/actions";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { useUser } from "@/utils/supabase/use-user";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,7 +10,7 @@ import { ThemeToggleWrapper } from "./theme-toggle-wrapper";
 import { Button } from "./ui/button";
 
 export default function AuthButton() {
-  const { user, loading } = useUser();
+  const { user, loading } = useSupabase();
   const pathname = usePathname();
 
   const isActiveLink = (path: string) => {
