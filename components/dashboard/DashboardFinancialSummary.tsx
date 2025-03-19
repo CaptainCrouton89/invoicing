@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/utils";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,18 +15,92 @@ type FinancialSummary = {
 };
 
 export default function DashboardFinancialSummary() {
+  const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
 
   useEffect(() => {
     async function fetchFinancialSummary() {
       try {
-        const response = await fetch("/api/dashboard/financial-summary");
-        if (!response.ok) {
-          throw new Error("Failed to fetch financial summary");
+        if (!user) {
+          setIsLoading(false);
+          return;
         }
-        const data = await response.json();
-        setSummary(data);
+
+        // Get current date and other date references
+        const today = new Date();
+        const todayStr = today.toISOString().split("T")[0];
+
+        // Calculate date 30 days ago
+        const date30DaysAgo = new Date();
+        date30DaysAgo.setDate(today.getDate() - 30);
+        const date30DaysAgoStr = date30DaysAgo.toISOString().split("T")[0];
+
+        // Calculate date 90 days ago
+        const date90DaysAgo = new Date();
+        date90DaysAgo.setDate(today.getDate() - 90);
+        const date90DaysAgoStr = date90DaysAgo.toISOString().split("T")[0];
+
+        // Calculate start of year
+        const startOfYear = new Date(today.getFullYear(), 0, 1);
+        const startOfYearStr = startOfYear.toISOString().split("T")[0];
+
+        // Get all invoices for the current user
+        const { data: invoices, error } = await supabase
+          .from("invoices")
+          .select("*")
+          .eq("user_id", user.id);
+
+        if (error) {
+          throw new Error("Failed to fetch invoice data");
+        }
+
+        // Calculate financial summary
+        const financialSummary = {
+          outstanding: 0, // All sent but not paid
+          overdue: 0, // Past due date and not paid
+          paid_last_30_days: 0,
+          paid_last_90_days: 0,
+          total_this_year: 0,
+          draft_total: 0,
+        };
+
+        invoices.forEach((invoice) => {
+          // Draft invoices
+          if (invoice.status === "draft") {
+            financialSummary.draft_total += invoice.total_amount || 0;
+          }
+
+          // Outstanding invoices (sent but not paid)
+          if (invoice.status === "sent") {
+            financialSummary.outstanding += invoice.total_amount || 0;
+
+            // Check if overdue
+            if (invoice.due_date < todayStr) {
+              financialSummary.overdue += invoice.total_amount || 0;
+            }
+          }
+
+          // Paid invoices
+          if (invoice.status === "paid") {
+            // Check if paid in last 30 days
+            if (invoice.paid_date && invoice.paid_date >= date30DaysAgoStr) {
+              financialSummary.paid_last_30_days += invoice.total_amount || 0;
+            }
+
+            // Check if paid in last 90 days
+            if (invoice.paid_date && invoice.paid_date >= date90DaysAgoStr) {
+              financialSummary.paid_last_90_days += invoice.total_amount || 0;
+            }
+
+            // Check if paid this year
+            if (invoice.paid_date && invoice.paid_date >= startOfYearStr) {
+              financialSummary.total_this_year += invoice.total_amount || 0;
+            }
+          }
+        });
+
+        setSummary(financialSummary);
       } catch (error) {
         console.error("Error fetching financial summary:", error);
         toast.error("Error loading financial data");
@@ -35,7 +110,7 @@ export default function DashboardFinancialSummary() {
     }
 
     fetchFinancialSummary();
-  }, []);
+  }, [supabase, user]);
 
   if (isLoading) {
     return (

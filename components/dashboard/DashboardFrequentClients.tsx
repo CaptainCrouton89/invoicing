@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,18 +16,60 @@ type FrequentClient = {
 
 export default function DashboardFrequentClients() {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [clients, setClients] = useState<FrequentClient[]>([]);
 
   useEffect(() => {
     async function fetchFrequentClients() {
       try {
-        const response = await fetch("/api/clients/frequent");
-        if (!response.ok) {
-          throw new Error("Failed to fetch frequent clients");
+        if (!user) {
+          setIsLoading(false);
+          return;
         }
-        const data = await response.json();
-        setClients(data);
+
+        // Get clients with invoice counts
+        const { data: clientsWithInvoices, error } = await supabase
+          .from("clients")
+          .select(
+            `
+            id,
+            name,
+            email,
+            invoices:invoices(id, total_amount)
+          `
+          )
+          .eq("user_id", user.id);
+
+        if (error) {
+          throw new Error("Failed to fetch clients data");
+        }
+
+        // Process the data to get invoice counts and total billed
+        const processedClients = clientsWithInvoices
+          .map((client) => {
+            const invoiceCount = client.invoices ? client.invoices.length : 0;
+            const totalBilled = client.invoices
+              ? client.invoices.reduce(
+                  (sum: number, inv: any) => sum + (inv.total_amount || 0),
+                  0
+                )
+              : 0;
+
+            return {
+              id: client.id,
+              name: client.name,
+              email: client.email,
+              invoice_count: invoiceCount,
+              total_billed: totalBilled,
+            };
+          })
+          // Sort by invoice count, descending
+          .sort((a, b) => b.invoice_count - a.invoice_count)
+          // Take top 5
+          .slice(0, 5);
+
+        setClients(processedClients);
       } catch (error) {
         console.error("Error fetching clients:", error);
         toast.error("Error loading frequent clients");
@@ -36,7 +79,7 @@ export default function DashboardFrequentClients() {
     }
 
     fetchFrequentClients();
-  }, []);
+  }, [supabase, user]);
 
   const handleCreateInvoice = (clientId: string) => {
     router.push(`/clients/${clientId}/invoices/new`);

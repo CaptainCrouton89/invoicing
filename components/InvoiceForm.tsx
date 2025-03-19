@@ -2,6 +2,7 @@
 
 import { Client, Invoice, InvoiceItem } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ export default function InvoiceForm({
   mode,
 }: InvoiceFormProps) {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
@@ -46,12 +48,22 @@ export default function InvoiceForm({
   useEffect(() => {
     async function fetchClients() {
       try {
-        const response = await fetch("/api/clients");
-        if (!response.ok) {
+        if (!user) {
+          setIsLoadingClients(false);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("clients")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("name", { ascending: true });
+
+        if (error) {
           throw new Error("Failed to fetch clients");
         }
-        const data = await response.json();
-        setClients(data);
+
+        setClients(data || []);
       } catch (error) {
         console.error("Error fetching clients:", error);
         toast.error("Failed to load clients");
@@ -61,7 +73,7 @@ export default function InvoiceForm({
     }
 
     fetchClients();
-  }, []);
+  }, [supabase, user]);
 
   // Calculate due date based on client payment terms
   useEffect(() => {
@@ -169,6 +181,11 @@ export default function InvoiceForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!user) {
+      toast.error("You must be logged in to perform this action");
+      return;
+    }
+
     if (!formData.client_id) {
       toast.error("Please select a client");
       return;
@@ -194,38 +211,127 @@ export default function InvoiceForm({
     setIsSubmitting(true);
 
     try {
-      const url =
-        mode === "create" ? "/api/invoices" : `/api/invoices/${invoice?.id}`;
+      // Get next invoice number from settings if creating a new invoice
+      if (mode === "create") {
+        // Get settings for invoice prefix and next number
+        const { data: settings, error: settingsError } = await supabase
+          .from("settings")
+          .select("invoice_prefix, next_invoice_number")
+          .eq("user_id", user.id)
+          .single();
 
-      const method = mode === "create" ? "POST" : "PUT";
+        if (settingsError && settingsError.code !== "PGRST116") {
+          throw new Error("Could not retrieve settings");
+        }
 
-      const payload = {
-        ...formData,
-        items: items,
-      };
+        // Generate invoice number
+        const invoicePrefix = settings?.invoice_prefix || "INV-";
+        const nextInvoiceNumber = settings?.next_invoice_number || 1;
+        const invoiceNumber = `${invoicePrefix}${String(nextInvoiceNumber).padStart(4, "0")}`;
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+        // Prepare data
+        const invoiceData = {
+          ...formData,
+          user_id: user.id,
+          invoice_number: invoiceNumber,
+          status: formData.status || "draft",
+        };
 
-      const data = await response.json();
+        // Insert invoice
+        const { data: newInvoice, error: invoiceError } = await supabase
+          .from("invoices")
+          .insert(invoiceData)
+          .select()
+          .single();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        if (invoiceError) {
+          throw new Error(invoiceError.message || "Failed to create invoice");
+        }
+
+        // Insert invoice items
+        if (items.length > 0) {
+          const itemsData = items.map((item) => ({
+            ...item,
+            invoice_id: newInvoice.id,
+          }));
+
+          const { error: itemsError } = await supabase
+            .from("invoice_items")
+            .insert(itemsData);
+
+          if (itemsError) {
+            throw new Error(
+              itemsError.message || "Failed to create invoice items"
+            );
+          }
+        }
+
+        // Update next invoice number in settings
+        const { error: updateError } = await supabase
+          .from("settings")
+          .update({ next_invoice_number: nextInvoiceNumber + 1 })
+          .eq("user_id", user.id);
+
+        if (updateError) {
+          console.error("Failed to update next invoice number:", updateError);
+          // Continue anyway as the invoice was created successfully
+        }
+
+        toast.success("Invoice created successfully");
+
+        // Redirect to invoice view
+        router.push(`/invoices/${newInvoice.id}`);
+      } else {
+        // Update existing invoice
+        const { error: invoiceError } = await supabase
+          .from("invoices")
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", invoice?.id)
+          .eq("user_id", user.id);
+
+        if (invoiceError) {
+          throw new Error(invoiceError.message || "Failed to update invoice");
+        }
+
+        // First delete existing items
+        const { error: deleteError } = await supabase
+          .from("invoice_items")
+          .delete()
+          .eq("invoice_id", invoice?.id);
+
+        if (deleteError) {
+          throw new Error(
+            deleteError.message || "Failed to update invoice items"
+          );
+        }
+
+        // Then insert new items
+        if (items.length > 0) {
+          const itemsData = items.map((item) => ({
+            ...item,
+            invoice_id: invoice?.id,
+          }));
+
+          const { error: itemsError } = await supabase
+            .from("invoice_items")
+            .insert(itemsData);
+
+          if (itemsError) {
+            throw new Error(
+              itemsError.message || "Failed to update invoice items"
+            );
+          }
+        }
+
+        toast.success("Invoice updated successfully");
+
+        // Redirect to invoice view
+        router.push(`/invoices/${invoice?.id}`);
       }
 
-      toast.success(
-        mode === "create"
-          ? "Invoice created successfully"
-          : "Invoice updated successfully"
-      );
-
-      // Redirect to invoice view
-      router.push(`/invoices/${data.id}`);
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An error occurred");

@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/utils";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -16,6 +17,7 @@ type AlertInvoice = {
 };
 
 export default function DashboardActionAlerts() {
+  const { supabase, user } = useSupabase();
   const [alerts, setAlerts] = useState<{
     overdue: AlertInvoice[];
     draftInvoices: AlertInvoice[];
@@ -30,12 +32,131 @@ export default function DashboardActionAlerts() {
   useEffect(() => {
     async function fetchAlerts() {
       try {
-        const response = await fetch("/api/dashboard/alerts");
-        if (!response.ok) {
-          throw new Error("Failed to fetch alerts");
+        if (!user) {
+          setIsLoading(false);
+          return;
         }
-        const data = await response.json();
-        setAlerts(data);
+
+        // Get current date
+        const today = new Date();
+        const todayStr = today.toISOString().split("T")[0];
+
+        // Calculate date 14 days in the future for upcoming invoices
+        const twoWeeksFromNow = new Date(today);
+        twoWeeksFromNow.setDate(today.getDate() + 14);
+        const twoWeeksStr = twoWeeksFromNow.toISOString().split("T")[0];
+
+        // Fetch overdue invoices (due date is before today and not paid)
+        const { data: overdueInvoices, error: overdueError } = await supabase
+          .from("invoices")
+          .select(
+            `
+            id,
+            invoice_number,
+            issue_date,
+            due_date,
+            total_amount,
+            status,
+            clients(id, name, email)
+          `
+          )
+          .eq("user_id", user.id)
+          .eq("status", "sent")
+          .lt("due_date", todayStr)
+          .order("due_date", { ascending: true });
+
+        if (overdueError) {
+          throw new Error("Failed to fetch overdue invoices");
+        }
+
+        // Fetch draft invoices
+        const { data: draftInvoices, error: draftError } = await supabase
+          .from("invoices")
+          .select(
+            `
+            id,
+            invoice_number,
+            issue_date,
+            due_date,
+            total_amount,
+            status,
+            clients(id, name, email)
+          `
+          )
+          .eq("user_id", user.id)
+          .eq("status", "draft")
+          .order("issue_date", { ascending: false })
+          .limit(5);
+
+        if (draftError) {
+          throw new Error("Failed to fetch draft invoices");
+        }
+
+        // Fetch upcoming due invoices (due in the next 2 weeks)
+        const { data: upcomingInvoices, error: upcomingError } = await supabase
+          .from("invoices")
+          .select(
+            `
+            id,
+            invoice_number,
+            issue_date,
+            due_date,
+            total_amount,
+            status,
+            clients(id, name, email)
+          `
+          )
+          .eq("user_id", user.id)
+          .eq("status", "sent")
+          .gte("due_date", todayStr)
+          .lte("due_date", twoWeeksStr)
+          .order("due_date", { ascending: true });
+
+        if (upcomingError) {
+          throw new Error("Failed to fetch upcoming invoices");
+        }
+
+        // Process the data
+        const processOverdue = overdueInvoices.map((invoice) => {
+          // Calculate days overdue
+          const dueDate = new Date(invoice.due_date);
+          const diffTime = Math.abs(today.getTime() - dueDate.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          return {
+            id: invoice.id,
+            invoice_number: invoice.invoice_number,
+            client_name: (invoice.clients as any)?.name || "Unknown Client",
+            due_date: invoice.due_date,
+            total_amount: invoice.total_amount,
+            status: invoice.status,
+            days_overdue: diffDays,
+          };
+        });
+
+        const processDrafts = draftInvoices.map((invoice) => ({
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          client_name: (invoice.clients as any)?.name || "Unknown Client",
+          due_date: invoice.due_date,
+          total_amount: invoice.total_amount,
+          status: invoice.status,
+        }));
+
+        const processUpcoming = upcomingInvoices.map((invoice) => ({
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          client_name: (invoice.clients as any)?.name || "Unknown Client",
+          due_date: invoice.due_date,
+          total_amount: invoice.total_amount,
+          status: invoice.status,
+        }));
+
+        setAlerts({
+          overdue: processOverdue,
+          draftInvoices: processDrafts,
+          upcomingDue: processUpcoming,
+        });
       } catch (error) {
         console.error("Error fetching alerts:", error);
         toast.error("Error loading alerts");
@@ -45,7 +166,7 @@ export default function DashboardActionAlerts() {
     }
 
     fetchAlerts();
-  }, []);
+  }, [supabase, user]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -53,15 +174,22 @@ export default function DashboardActionAlerts() {
 
   const handleMarkAsPaid = async (invoiceId: string) => {
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: "paid" }),
-      });
+      if (!user) {
+        toast.error("You must be logged in to perform this action");
+        return;
+      }
 
-      if (!response.ok) {
+      const { error } = await supabase
+        .from("invoices")
+        .update({
+          status: "paid",
+          paid_date: new Date().toISOString().split("T")[0],
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", invoiceId)
+        .eq("user_id", user.id);
+
+      if (error) {
         throw new Error("Failed to update invoice status");
       }
 

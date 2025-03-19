@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/utils";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ type InvoiceItem = {
 
 export default function DashboardInvoiceManagement() {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [invoices, setInvoices] = useState<InvoiceItem[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
@@ -25,22 +27,54 @@ export default function DashboardInvoiceManagement() {
   useEffect(() => {
     async function fetchRecentInvoices() {
       try {
-        const response = await fetch("/api/dashboard/recent-invoices");
-        if (!response.ok) {
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: recentInvoices, error } = await supabase
+          .from("invoices")
+          .select(
+            `
+            id,
+            invoice_number,
+            issue_date,
+            due_date,
+            total_amount,
+            status,
+            clients(id, name)
+          `
+          )
+          .eq("user_id", user.id)
+          .order("issue_date", { ascending: false })
+          .limit(5);
+
+        if (error) {
           throw new Error("Failed to fetch invoices");
         }
-        const data = await response.json();
-        setInvoices(data);
+
+        // Process the data
+        const processedInvoices = recentInvoices.map((invoice) => ({
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          client_name: (invoice.clients as any)?.name || "Unknown Client",
+          issue_date: invoice.issue_date,
+          due_date: invoice.due_date,
+          total_amount: invoice.total_amount,
+          status: invoice.status as "draft" | "sent" | "paid" | "overdue",
+        }));
+
+        setInvoices(processedInvoices);
       } catch (error) {
         console.error("Error fetching invoices:", error);
-        toast.error("Error loading invoices");
+        toast.error("Failed to load recent invoices");
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchRecentInvoices();
-  }, []);
+  }, [supabase, user]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -62,36 +96,46 @@ export default function DashboardInvoiceManagement() {
   };
 
   const handleUpdateStatus = async (invoiceId: string, newStatus: string) => {
-    setIsUpdating(invoiceId);
-
     try {
-      const response = await fetch(`/api/invoices/${invoiceId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      setIsUpdating(invoiceId);
 
-      if (!response.ok) {
+      if (!user) {
+        toast.error("You must be logged in to perform this action");
+        return;
+      }
+
+      // Get the current date for 'paid_date' if status is being set to 'paid'
+      const updateData: any = {
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (newStatus === "paid") {
+        updateData.paid_date = new Date().toISOString().split("T")[0];
+      }
+
+      const { error } = await supabase
+        .from("invoices")
+        .update(updateData)
+        .eq("id", invoiceId)
+        .eq("user_id", user.id);
+
+      if (error) {
         throw new Error("Failed to update invoice status");
       }
 
-      // Update the invoice status in the local state
+      // Update the local state
       setInvoices((prevInvoices) =>
-        prevInvoices.map((inv) =>
-          inv.id === invoiceId
-            ? {
-                ...inv,
-                status: newStatus as "draft" | "sent" | "paid" | "overdue",
-              }
-            : inv
+        prevInvoices.map((invoice) =>
+          invoice.id === invoiceId
+            ? { ...invoice, status: newStatus as any }
+            : invoice
         )
       );
 
-      toast.success(`Invoice marked as ${newStatus}`);
+      toast.success(`Invoice status updated to ${newStatus}`);
     } catch (error) {
-      console.error("Error updating invoice:", error);
+      console.error("Error updating invoice status:", error);
       toast.error("Failed to update invoice status");
     } finally {
       setIsUpdating(null);

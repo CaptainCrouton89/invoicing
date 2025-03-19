@@ -51,7 +51,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full border-b border-b-foreground/10 h-16">
-      <div className="app-container h-full flex justify-between items-center text-sm">
+      <div className="mx-auto container h-full flex justify-between items-center text-sm">
         <div className="flex items-center gap-8">
           <Link href="/" className="font-bold text-lg">
             Invoicing App

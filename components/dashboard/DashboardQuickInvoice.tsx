@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -17,6 +18,7 @@ type FrequentClient = {
 
 export default function DashboardQuickInvoice() {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [frequentClients, setFrequentClients] = useState<FrequentClient[]>([]);
@@ -25,16 +27,46 @@ export default function DashboardQuickInvoice() {
   useEffect(() => {
     async function fetchFrequentClients() {
       try {
-        const response = await fetch("/api/clients/frequent");
-        if (!response.ok) {
-          throw new Error("Failed to fetch frequent clients");
+        if (!user) {
+          setIsLoading(false);
+          return;
         }
-        const data = await response.json();
-        setFrequentClients(data);
+
+        // Get clients with invoice counts to find frequent clients
+        const { data: clientsWithInvoices, error } = await supabase
+          .from("clients")
+          .select(
+            `
+            id,
+            name,
+            email,
+            invoices:invoices(id)
+          `
+          )
+          .eq("user_id", user.id);
+
+        if (error) {
+          throw new Error("Failed to fetch clients data");
+        }
+
+        // Process the data to get clients with the most invoices
+        const processedClients = clientsWithInvoices
+          .map((client) => ({
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            invoice_count: client.invoices ? client.invoices.length : 0,
+          }))
+          // Sort by invoice count, descending
+          .sort((a, b) => b.invoice_count - a.invoice_count)
+          // Take top 5
+          .slice(0, 5);
+
+        setFrequentClients(processedClients);
 
         // If there are clients, select the first one by default
-        if (data.length > 0) {
-          setSelectedClientId(data[0].id);
+        if (processedClients.length > 0) {
+          setSelectedClientId(processedClients[0].id);
         }
       } catch (error) {
         console.error("Error fetching clients:", error);
@@ -45,10 +77,10 @@ export default function DashboardQuickInvoice() {
     }
 
     fetchFrequentClients();
-  }, []);
+  }, [supabase, user]);
 
   const handleCreateInvoice = async () => {
-    if (!selectedClientId) {
+    if (!selectedClientId || !user) {
       toast.error("Please select a client");
       return;
     }
@@ -56,27 +88,62 @@ export default function DashboardQuickInvoice() {
     setIsCreating(true);
 
     try {
-      // Create a basic invoice for the selected client
-      const response = await fetch(`/api/invoices`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_id: selectedClientId,
-          // Other fields will be filled with defaults or in the next edit screen
-        }),
-      });
+      // Get settings for invoice prefix and next number
+      const { data: settings, error: settingsError } = await supabase
+        .from("settings")
+        .select("invoice_prefix, next_invoice_number")
+        .eq("user_id", user.id)
+        .single();
 
-      if (!response.ok) {
+      if (settingsError && settingsError.code !== "PGRST116") {
+        throw new Error("Failed to retrieve settings");
+      }
+
+      // Generate invoice number
+      const invoicePrefix = settings?.invoice_prefix || "INV-";
+      const nextInvoiceNumber = settings?.next_invoice_number || 1001;
+      const invoiceNumber = `${invoicePrefix}${String(nextInvoiceNumber).padStart(4, "0")}`;
+
+      // Get current date for issue date
+      const today = new Date();
+      const issueDate = today.toISOString().split("T")[0];
+
+      // Calculate due date (default 30 days)
+      const dueDate = new Date();
+      dueDate.setDate(today.getDate() + 30);
+      const dueDateStr = dueDate.toISOString().split("T")[0];
+
+      // Create basic invoice with minimal data
+      const { data: invoice, error } = await supabase
+        .from("invoices")
+        .insert({
+          user_id: user.id,
+          client_id: selectedClientId,
+          invoice_number: invoiceNumber,
+          issue_date: issueDate,
+          due_date: dueDateStr,
+          status: "draft",
+          total_amount: 0,
+        })
+        .select()
+        .single();
+
+      if (error) {
         throw new Error("Failed to create invoice");
       }
 
-      const { id } = await response.json();
-      toast.success("Invoice created successfully");
+      // Update next invoice number in settings
+      if (settings) {
+        await supabase
+          .from("settings")
+          .update({ next_invoice_number: nextInvoiceNumber + 1 })
+          .eq("user_id", user.id);
+      }
+
+      toast.success("Draft invoice created successfully");
 
       // Redirect to the invoice edit page
-      router.push(`/invoices/${id}/edit`);
+      router.push(`/invoices/${invoice.id}/edit`);
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast.error("Failed to create invoice");

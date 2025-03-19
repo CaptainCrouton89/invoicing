@@ -1,6 +1,7 @@
 "use client";
 
 import { Settings } from "@/lib/types";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ type SettingsFormProps = {
 
 const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -26,14 +28,50 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
   }, [initialSettings]);
 
   const fetchSettings = async () => {
+    if (!user) {
+      toast.error("You must be logged in to view settings");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch("/api/settings");
-      if (!response.ok) {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 means no rows returned
         throw new Error("Failed to fetch settings");
       }
-      const data = await response.json();
-      setSettings(data);
+
+      if (data) {
+        setSettings(data);
+      } else {
+        // Create default settings if none exist
+        const defaultSettings: Partial<Settings> = {
+          user_id: user.id,
+          business_name: "",
+          invoice_prefix: "INV-",
+          next_invoice_number: 1001,
+          tax_rate: 0,
+          theme_color: "#3b82f6", // Default blue
+          footer_notes: "Thank you for your business.",
+        };
+
+        const { data: newSettings, error: createError } = await supabase
+          .from("settings")
+          .insert(defaultSettings)
+          .select()
+          .single();
+
+        if (createError) {
+          throw new Error("Failed to create default settings");
+        }
+
+        setSettings(newSettings);
+      }
     } catch (error) {
       console.error("Error fetching settings:", error);
       toast.error("Error loading settings");
@@ -74,24 +112,25 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!settings) return;
+    if (!settings || !user) return;
 
     setIsSaving(true);
     try {
-      const response = await fetch("/api/settings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(settings),
-      });
+      const { data, error } = await supabase
+        .from("settings")
+        .upsert({
+          ...settings,
+          user_id: user.id,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
-      if (!response.ok) {
+      if (error) {
         throw new Error("Failed to save settings");
       }
 
-      const updatedSettings = await response.json();
-      setSettings(updatedSettings);
+      setSettings(data);
       toast.success("Settings saved successfully");
       router.refresh();
     } catch (error) {
@@ -104,7 +143,7 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !user) return;
 
     // Check file size (limit to 2MB)
     if (file.size > 2 * 1024 * 1024) {
@@ -114,21 +153,39 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // Create a filename with the user ID and original extension
+      const fileExt = file.name.split(".").pop();
+      const fileName = `logo_${user.id}_${Date.now()}.${fileExt}`;
+      const filePath = `logos/${fileName}`;
 
-      const response = await fetch("/api/settings/logo", {
-        method: "POST",
-        body: formData,
-      });
+      // Upload the file to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("business_assets")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
 
-      if (!response.ok) {
+      if (uploadError) {
         throw new Error("Failed to upload logo");
       }
 
-      const { logo_url } = await response.json();
+      // Get the public URL for the uploaded file
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("business_assets").getPublicUrl(filePath);
 
-      setSettings((prev) => (prev ? { ...prev, logo_url } : null));
+      // Update settings with new logo URL
+      const { error: updateError } = await supabase
+        .from("settings")
+        .update({ logo_url: publicUrl })
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        throw new Error("Failed to update logo URL");
+      }
+
+      setSettings((prev) => (prev ? { ...prev, logo_url: publicUrl } : null));
       toast.success("Logo uploaded successfully");
     } catch (error) {
       console.error("Error uploading logo:", error);
@@ -141,7 +198,7 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
   };
 
   const handleRemoveLogo = async () => {
-    if (!settings?.logo_url) return;
+    if (!settings?.logo_url || !user) return;
 
     if (!confirm("Are you sure you want to remove your logo?")) {
       return;
@@ -149,12 +206,27 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
 
     setIsUploading(true);
     try {
-      const response = await fetch("/api/settings/logo", {
-        method: "DELETE",
-      });
+      // Extract the file path from the URL
+      const urlParts = settings.logo_url.split("/");
+      const filePath = `logos/${urlParts[urlParts.length - 1]}`;
 
-      if (!response.ok) {
-        throw new Error("Failed to remove logo");
+      // Delete from storage
+      const { error: deleteError } = await supabase.storage
+        .from("business_assets")
+        .remove([filePath]);
+
+      if (deleteError) {
+        console.error("Error deleting logo file:", deleteError);
+      }
+
+      // Update settings to remove logo URL
+      const { error: updateError } = await supabase
+        .from("settings")
+        .update({ logo_url: null })
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        throw new Error("Failed to update settings");
       }
 
       setSettings((prev) => (prev ? { ...prev, logo_url: undefined } : null));

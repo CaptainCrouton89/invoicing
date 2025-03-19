@@ -1,6 +1,7 @@
 "use client";
 
 import { Client } from "@/lib/types";
+import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ interface ClientFormProps {
 
 export default function ClientForm({ client, mode }: ClientFormProps) {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<Partial<Client>>(
     client || {
@@ -47,33 +49,50 @@ export default function ClientForm({ client, mode }: ClientFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      toast.error("You must be logged in to perform this action");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const url =
-        mode === "create" ? "/api/clients" : `/api/clients/${client?.id}`;
+      if (mode === "create") {
+        // Add user_id to the client data
+        const clientData = {
+          ...formData,
+          user_id: user.id,
+        };
 
-      const method = mode === "create" ? "POST" : "PUT";
+        const { data, error } = await supabase
+          .from("clients")
+          .insert(clientData)
+          .select()
+          .single();
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+        if (error) {
+          throw new Error(error.message || "Failed to create client");
+        }
 
-      const data = await response.json();
+        toast.success("Client created successfully");
+      } else {
+        // Update existing client
+        const { error } = await supabase
+          .from("clients")
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", client?.id)
+          .eq("user_id", user.id);
 
-      if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        if (error) {
+          throw new Error(error.message || "Failed to update client");
+        }
+
+        toast.success("Client updated successfully");
       }
-
-      toast.success(
-        mode === "create"
-          ? "Client created successfully"
-          : "Client updated successfully"
-      );
 
       router.push("/clients");
       router.refresh();
