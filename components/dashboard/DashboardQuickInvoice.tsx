@@ -182,15 +182,10 @@ export default function DashboardQuickInvoice() {
     return (
       <div className="p-6 text-center">
         <p className="text-gray-500 dark:text-gray-400">No clients found</p>
-        <p className="text-sm mt-2 text-gray-400 dark:text-gray-500">
+        <p className="text-sm mt-2 text-gray-400 dark:text-gray-500 mb-4">
           Add clients to enable quick invoicing
         </p>
-        <Button
-          onClick={() => router.push("/clients/new")}
-          className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-        >
-          Add Client
-        </Button>
+        <Button onClick={() => router.push("/clients/new")}>Add Client</Button>
       </div>
     );
   }

@@ -11,7 +11,7 @@ export default async function NewInvoicePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   return (

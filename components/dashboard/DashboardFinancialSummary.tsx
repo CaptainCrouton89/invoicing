@@ -20,7 +20,6 @@ export default function DashboardFinancialSummary() {
   const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
-  console.log(summary);
 
   useEffect(() => {
     async function fetchFinancialSummary() {
@@ -58,8 +57,6 @@ export default function DashboardFinancialSummary() {
           throw new Error("Failed to fetch invoice data");
         }
 
-        console.log(invoices);
-
         // Calculate financial summary
         const financialSummary = {
           outstanding: 0, // All sent but not paid
@@ -88,11 +85,9 @@ export default function DashboardFinancialSummary() {
 
           // Paid invoices
           if (invoice.status === "paid") {
-            console.log(invoice);
             // Check if paid in last 30 days
             if (invoice.paid_date && invoice.paid_date >= date30DaysAgoStr) {
               financialSummary.paid_last_30_days += invoice.total_amount || 0;
-              console.log(invoice.paid_date);
             }
 
             // Check if paid in last 90 days

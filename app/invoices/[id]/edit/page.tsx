@@ -37,11 +37,9 @@ async function getInvoice(id: string): Promise<EnhancedInvoice | null> {
   return data as EnhancedInvoice;
 }
 
-export default async function EditInvoicePage(
-  props: {
-    params: Promise<{ id: string }>;
-  }
-) {
+export default async function EditInvoicePage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = await props.params;
   const supabase = await createClient();
 
@@ -51,7 +49,7 @@ export default async function EditInvoicePage(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const invoice = await getInvoice(params.id);
