@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Client, Invoice, InvoiceItem } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
@@ -20,26 +20,41 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-interface EnhancedInvoice extends Omit<Invoice, "status"> {
-  items: InvoiceItem[];
-  clients: Client;
-  paid_date?: string;
-  status: "draft" | "sent" | "paid" | "overdue";
-}
-
 export default function InvoiceDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { supabase, user } = useSupabase();
-  const [invoice, setInvoice] = useState<EnhancedInvoice | null>(null);
+  const [invoice, setInvoice] = useState<
+    | ((Database["public"]["Tables"]["invoices"]["Row"] & {
+        items: Database["public"]["Tables"]["invoice_items"]["Row"][];
+      }) & {
+        clients: Database["public"]["Tables"]["clients"]["Row"];
+      })
+    | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [businessInfo, setBusinessInfo] = useState<any>({
-    name: "Your Business Name",
-    address: "123 Business St, City, Country",
-    phone: "+1 234 567 890",
-    email: "contact@yourbusiness.com",
-    taxId: "TAX-ID-12345",
+  const [businessInfo, setBusinessInfo] = useState<
+    Database["public"]["Tables"]["settings"]["Row"] & {
+      logo_url: string;
+    }
+  >({
+    business_name: "Your Business Name",
+    business_address: "123 Business St, City, Country",
+    business_phone: "+1 234 567 890",
+    business_email: "contact@yourbusiness.com",
+    tax_id: "TAX-ID-12345",
+    logo_url: "",
+    created_at: "",
+    default_payment_terms: 30,
+    footer_notes: "",
+    id: "",
+    user_id: "",
+    invoice_prefix: "",
+    next_invoice_number: 1,
+    tax_rate: 0,
+    theme_color: "#000000",
+    updated_at: "",
   });
   const [isPaying, setIsPaying] = useState(false);
 
@@ -60,7 +75,7 @@ export default function InvoiceDetailPage() {
             clients(*)
           `
           )
-          .eq("id", params.id)
+          .eq("id", params.id as string)
           .eq("user_id", user.id)
           .single();
 
@@ -68,7 +83,7 @@ export default function InvoiceDetailPage() {
           throw new Error("Failed to fetch invoice");
         }
 
-        setInvoice(data as EnhancedInvoice);
+        setInvoice(data);
 
         // Fetch business info from settings
         const { data: settings, error: settingsError } = await supabase
@@ -79,13 +94,24 @@ export default function InvoiceDetailPage() {
 
         if (settings && !settingsError) {
           setBusinessInfo({
-            name: settings.business_name || "Your Business Name",
-            address:
+            business_name: settings.business_name || "Your Business Name",
+            business_address:
               settings.business_address || "123 Business St, City, Country",
-            phone: settings.business_phone || "+1 234 567 890",
-            email: settings.business_email || "contact@yourbusiness.com",
-            taxId: settings.tax_id || "TAX-ID-12345",
-            logoUrl: settings.logo_url || "",
+            business_phone: settings.business_phone || "+1 234 567 890",
+            business_email:
+              settings.business_email || "contact@yourbusiness.com",
+            tax_id: settings.tax_id || "TAX-ID-12345",
+            logo_url: settings.logo_url || "",
+            created_at: settings.created_at || "",
+            default_payment_terms: settings.default_payment_terms || 30,
+            footer_notes: settings.footer_notes || "",
+            id: settings.id || "",
+            user_id: settings.user_id || "",
+            invoice_prefix: settings.invoice_prefix || "",
+            next_invoice_number: settings.next_invoice_number || 1,
+            tax_rate: settings.tax_rate || 0,
+            theme_color: settings.theme_color || "#000000",
+            updated_at: settings.updated_at || "",
           });
         }
       } catch (error) {
@@ -365,7 +391,7 @@ export default function InvoiceDetailPage() {
               </div>
               <div className="flex justify-between py-2">
                 <span className="font-medium">
-                  Tax {invoice.tax_rate ? `(${invoice.tax_rate}%)` : ""}:
+                  Tax {invoice.tax_amount ? `(${invoice.tax_amount}%)` : ""}:
                 </span>
                 <span>{formatCurrency(invoice.tax_amount)}</span>
               </div>

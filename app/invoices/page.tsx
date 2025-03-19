@@ -9,17 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Invoice } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { formatCurrency } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
-type InvoiceWithClient = Invoice & {
-  clients: {
-    id: string;
-    name: string;
-    email: string;
-  };
+type InvoiceWithClient = Database["public"]["Tables"]["invoices"]["Row"] & {
+  clients: Database["public"]["Tables"]["clients"]["Row"];
 };
 
 async function getInvoices(): Promise<InvoiceWithClient[]> {

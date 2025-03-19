@@ -1,13 +1,14 @@
 import InvoiceForm from "@/components/InvoiceForm";
-import { Invoice, InvoiceItem } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { createClient } from "@/utils/supabase/server";
 import { notFound, redirect } from "next/navigation";
 
-interface EnhancedInvoice extends Invoice {
-  items: InvoiceItem[];
-}
-
-async function getInvoice(id: string): Promise<EnhancedInvoice | null> {
+async function getInvoice(id: string): Promise<
+  | (Database["public"]["Tables"]["invoices"]["Row"] & {
+      items: Database["public"]["Tables"]["invoice_items"]["Row"][];
+    })
+  | null
+> {
   const supabase = await createClient();
 
   const {
@@ -34,7 +35,7 @@ async function getInvoice(id: string): Promise<EnhancedInvoice | null> {
     return null;
   }
 
-  return data as EnhancedInvoice;
+  return data;
 }
 
 export default async function EditInvoicePage(props: {

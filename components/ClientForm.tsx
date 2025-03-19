@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Client } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,7 +13,7 @@ import { toast } from "sonner";
 type FormMode = "create" | "edit";
 
 interface ClientFormProps {
-  client?: Client;
+  client?: Database["public"]["Tables"]["clients"]["Row"];
   mode: FormMode;
 }
 
@@ -21,7 +21,9 @@ export default function ClientForm({ client, mode }: ClientFormProps) {
   const router = useRouter();
   const { supabase, user } = useSupabase();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<Partial<Client>>(
+  const [formData, setFormData] = useState<
+    Database["public"]["Tables"]["clients"]["Row"]
+  >(
     client || {
       name: "",
       contact_person: "",
@@ -30,6 +32,10 @@ export default function ClientForm({ client, mode }: ClientFormProps) {
       address: "",
       default_payment_terms: 30,
       notes: "",
+      created_at: null,
+      id: "",
+      updated_at: null,
+      user_id: "",
     }
   );
 
@@ -88,7 +94,7 @@ export default function ClientForm({ client, mode }: ClientFormProps) {
             ...formData,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", client?.id)
+          .eq("id", client?.id || "")
           .eq("user_id", user.id);
 
         if (error) {

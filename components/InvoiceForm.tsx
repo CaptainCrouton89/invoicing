@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Client, Invoice, InvoiceItem } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
@@ -30,8 +30,10 @@ import { toast } from "sonner";
 type FormMode = "create" | "edit";
 
 interface InvoiceFormProps {
-  invoice?: Invoice & { items: InvoiceItem[] };
-  client?: Client;
+  invoice?: Database["public"]["Tables"]["invoices"]["Row"] & {
+    items: Database["public"]["Tables"]["invoice_items"]["Row"][];
+  };
+  client?: Database["public"]["Tables"]["clients"]["Row"];
   mode: FormMode;
 }
 
@@ -43,10 +45,14 @@ export default function InvoiceForm({
   const router = useRouter();
   const { supabase, user } = useSupabase();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [clients, setClients] = useState<
+    Database["public"]["Tables"]["clients"]["Row"][]
+  >([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
 
-  const [formData, setFormData] = useState<Partial<Invoice>>({
+  const [formData, setFormData] = useState<
+    Partial<Database["public"]["Tables"]["invoices"]["Row"]>
+  >({
     client_id: client?.id || invoice?.client_id || "",
     issue_date: invoice?.issue_date || new Date().toISOString().split("T")[0],
     due_date: invoice?.due_date || "",
@@ -58,11 +64,9 @@ export default function InvoiceForm({
     notes: invoice?.notes || "",
   });
 
-  const [items, setItems] = useState<Partial<InvoiceItem>[]>(
-    invoice?.items || [
-      { description: "", quantity: 1, unit_price: 0, amount: 0 },
-    ]
-  );
+  const [items, setItems] = useState<
+    Database["public"]["Tables"]["invoice_items"]["Row"][]
+  >(invoice?.items || []);
 
   // Fetch clients
   useEffect(() => {
@@ -186,7 +190,17 @@ export default function InvoiceForm({
   const addItem = () => {
     setItems([
       ...items,
-      { description: "", quantity: 1, unit_price: 0, amount: 0 },
+      {
+        description: "",
+        quantity: 1,
+        unit_price: 0,
+        amount: 0,
+        created_at: null,
+        discount: null,
+        id: "",
+        invoice_id: "",
+        tax_rate: null,
+      },
     ]);
   };
 
@@ -250,12 +264,21 @@ export default function InvoiceForm({
         const invoiceNumber = `${invoicePrefix}${String(nextInvoiceNumber).padStart(4, "0")}`;
 
         // Prepare data
-        const invoiceData = {
-          ...formData,
-          user_id: user.id,
-          invoice_number: invoiceNumber,
-          status: formData.status || "draft",
-        };
+        const invoiceData: Database["public"]["Tables"]["invoices"]["Insert"] =
+          {
+            ...formData,
+            user_id: user.id,
+            invoice_number: invoiceNumber,
+            status: formData.status || "draft",
+            client_id: formData.client_id || "",
+            discount_amount: formData.discount_amount || 0,
+            due_date: formData.due_date || "",
+            issue_date: formData.issue_date || "",
+            notes: formData.notes || "",
+            subtotal: formData.subtotal || 0,
+            tax_amount: formData.tax_amount || 0,
+            total_amount: formData.total_amount || 0,
+          };
 
         // Insert invoice
         const { data: newInvoice, error: invoiceError } = await supabase
@@ -309,7 +332,7 @@ export default function InvoiceForm({
             ...formData,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", invoice?.id)
+          .eq("id", invoice?.id || "")
           .eq("user_id", user.id);
 
         if (invoiceError) {
@@ -320,7 +343,7 @@ export default function InvoiceForm({
         const { error: deleteError } = await supabase
           .from("invoice_items")
           .delete()
-          .eq("invoice_id", invoice?.id);
+          .eq("invoice_id", invoice?.id || "");
 
         if (deleteError) {
           throw new Error(
@@ -332,7 +355,7 @@ export default function InvoiceForm({
         if (items.length > 0) {
           const itemsData = items.map((item) => ({
             ...item,
-            invoice_id: invoice?.id,
+            invoice_id: invoice?.id || "",
           }));
 
           const { error: itemsError } = await supabase

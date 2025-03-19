@@ -3,14 +3,16 @@
 import SettingsForm from "@/components/SettingsForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { supabase, user } = useSupabase();
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<
+    Database["public"]["Tables"]["settings"]["Row"] | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

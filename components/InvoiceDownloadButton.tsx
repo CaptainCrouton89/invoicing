@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Client, Invoice, InvoiceItem } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { formatCurrency } from "@/lib/utils";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
@@ -17,18 +17,11 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 type InvoiceDownloadButtonProps = {
-  invoice: Invoice & {
-    items: InvoiceItem[];
-    clients: Client;
+  invoice: Database["public"]["Tables"]["invoices"]["Row"] & {
+    items: Database["public"]["Tables"]["invoice_items"]["Row"][];
+    clients: Database["public"]["Tables"]["clients"]["Row"];
   };
-  businessInfo: {
-    name: string;
-    address?: string;
-    phone?: string;
-    email?: string;
-    taxId?: string;
-    logoUrl?: string;
-  };
+  businessInfo: Database["public"]["Tables"]["settings"]["Row"];
   children?: React.ReactNode;
 };
 
@@ -83,7 +76,7 @@ const InvoiceDownloadButton = ({
         pdf.rect(0, 0, pageWidth, 120, "F");
 
         // Load and add company logo if available
-        if (businessInfo.logoUrl) {
+        if (businessInfo.logo_url) {
           try {
             // Use async/await to make sure logo is loaded before continuing
             await new Promise<void>((resolve, reject) => {
@@ -123,7 +116,7 @@ const InvoiceDownloadButton = ({
                 resolve(); // Continue without logo
               };
 
-              img.src = businessInfo.logoUrl || ""; // Handle undefined case
+              img.src = businessInfo.logo_url || ""; // Handle undefined case
             });
 
             // After logo, position company name to the right of the logo
@@ -131,21 +124,25 @@ const InvoiceDownloadButton = ({
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.setFontSize(24);
             pdf.setFont("helvetica", "bold");
-            pdf.text(businessInfo.name, margin + logoWidth + 20, 60);
+            pdf.text(
+              businessInfo.business_name || "",
+              margin + logoWidth + 20,
+              60
+            );
           } catch (logoError) {
             console.error("Error adding logo:", logoError);
             // Fallback to normal company header if logo fails
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.setFontSize(24);
             pdf.setFont("helvetica", "bold");
-            pdf.text(businessInfo.name, margin, 50);
+            pdf.text(businessInfo.business_name || "", margin, 50);
           }
         } else {
           // Company header
           pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
           pdf.setFontSize(24);
           pdf.setFont("helvetica", "bold");
-          pdf.text(businessInfo.name, margin, 50);
+          pdf.text(businessInfo.business_name || "", margin, 50);
         }
 
         // Reset text color for regular content
@@ -154,25 +151,37 @@ const InvoiceDownloadButton = ({
         pdf.setFont("helvetica", "normal");
 
         // Company details - adjust position based on whether logo is present
-        const companyStartY = businessInfo.logoUrl ? 80 : 70;
+        const companyStartY = businessInfo.logo_url ? 80 : 70;
         // If logo exists, align company info with the company name (to the right of the logo)
-        const companyInfoX = businessInfo.logoUrl ? margin + 60 + 20 : margin;
+        const companyInfoX = businessInfo.logo_url ? margin + 60 + 20 : margin;
         let companyInfoY = companyStartY;
 
-        if (businessInfo.address) {
-          pdf.text(businessInfo.address, companyInfoX, companyInfoY);
+        if (businessInfo.business_address) {
+          pdf.text(businessInfo.business_address, companyInfoX, companyInfoY);
           companyInfoY += 15;
         }
-        if (businessInfo.email) {
-          pdf.text(`Email: ${businessInfo.email}`, companyInfoX, companyInfoY);
+        if (businessInfo.business_email) {
+          pdf.text(
+            `Email: ${businessInfo.business_email}`,
+            companyInfoX,
+            companyInfoY
+          );
           companyInfoY += 15;
         }
-        if (businessInfo.phone) {
-          pdf.text(`Phone: ${businessInfo.phone}`, companyInfoX, companyInfoY);
+        if (businessInfo.business_phone) {
+          pdf.text(
+            `Phone: ${businessInfo.business_phone}`,
+            companyInfoX,
+            companyInfoY
+          );
           companyInfoY += 15;
         }
-        if (businessInfo.taxId) {
-          pdf.text(`Tax ID: ${businessInfo.taxId}`, companyInfoX, companyInfoY);
+        if (businessInfo.tax_id) {
+          pdf.text(
+            `Tax ID: ${businessInfo.tax_id}`,
+            companyInfoX,
+            companyInfoY
+          );
         }
 
         // Invoice header - right aligned
@@ -540,10 +549,10 @@ const InvoiceDownloadButton = ({
           {/* Invoice Header */}
           <div className="flex justify-between mb-8">
             <div className="flex">
-              {businessInfo.logoUrl && (
+              {businessInfo.logo_url && (
                 <div className="mr-4">
                   <img
-                    src={businessInfo.logoUrl}
+                    src={businessInfo.logo_url}
                     alt="Business Logo"
                     style={{ maxHeight: "60px", maxWidth: "150px" }}
                     className="object-contain"
@@ -552,12 +561,18 @@ const InvoiceDownloadButton = ({
               )}
               <div>
                 <h1 className="text-2xl font-bold text-blue-600">
-                  {businessInfo.name}
+                  {businessInfo.business_name}
                 </h1>
-                {businessInfo.address && <p>{businessInfo.address}</p>}
-                {businessInfo.phone && <p>Phone: {businessInfo.phone}</p>}
-                {businessInfo.email && <p>Email: {businessInfo.email}</p>}
-                {businessInfo.taxId && <p>Tax ID: {businessInfo.taxId}</p>}
+                {businessInfo.business_address && (
+                  <p>{businessInfo.business_address}</p>
+                )}
+                {businessInfo.business_phone && (
+                  <p>Phone: {businessInfo.business_phone}</p>
+                )}
+                {businessInfo.business_email && (
+                  <p>Email: {businessInfo.business_email}</p>
+                )}
+                {businessInfo.tax_id && <p>Tax ID: {businessInfo.tax_id}</p>}
               </div>
             </div>
             <div>

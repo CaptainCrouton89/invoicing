@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Invoice } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
@@ -67,40 +67,42 @@ export default function DashboardFinancialSummary() {
           draft_total: 0,
         };
 
-        invoices.forEach((invoice: Invoice) => {
-          // Draft invoices
-          if (invoice.status === "draft") {
-            financialSummary.draft_total += invoice.total_amount || 0;
-          }
+        invoices.forEach(
+          (invoice: Database["public"]["Tables"]["invoices"]["Row"]) => {
+            // Draft invoices
+            if (invoice.status === "draft") {
+              financialSummary.draft_total += invoice.total_amount || 0;
+            }
 
-          // Outstanding invoices (sent but not paid)
-          if (invoice.status === "sent") {
-            financialSummary.outstanding += invoice.total_amount || 0;
+            // Outstanding invoices (sent but not paid)
+            if (invoice.status === "sent") {
+              financialSummary.outstanding += invoice.total_amount || 0;
 
-            // Check if overdue
-            if (invoice.due_date < todayStr) {
-              financialSummary.overdue += invoice.total_amount || 0;
+              // Check if overdue
+              if (invoice.due_date < todayStr) {
+                financialSummary.overdue += invoice.total_amount || 0;
+              }
+            }
+
+            // Paid invoices
+            if (invoice.status === "paid") {
+              // Check if paid in last 30 days
+              if (invoice.paid_date && invoice.paid_date >= date30DaysAgoStr) {
+                financialSummary.paid_last_30_days += invoice.total_amount || 0;
+              }
+
+              // Check if paid in last 90 days
+              if (invoice.paid_date && invoice.paid_date >= date90DaysAgoStr) {
+                financialSummary.paid_last_90_days += invoice.total_amount || 0;
+              }
+
+              // Check if paid this year
+              if (invoice.paid_date && invoice.paid_date >= startOfYearStr) {
+                financialSummary.total_this_year += invoice.total_amount || 0;
+              }
             }
           }
-
-          // Paid invoices
-          if (invoice.status === "paid") {
-            // Check if paid in last 30 days
-            if (invoice.paid_date && invoice.paid_date >= date30DaysAgoStr) {
-              financialSummary.paid_last_30_days += invoice.total_amount || 0;
-            }
-
-            // Check if paid in last 90 days
-            if (invoice.paid_date && invoice.paid_date >= date90DaysAgoStr) {
-              financialSummary.paid_last_90_days += invoice.total_amount || 0;
-            }
-
-            // Check if paid this year
-            if (invoice.paid_date && invoice.paid_date >= startOfYearStr) {
-              financialSummary.total_this_year += invoice.total_amount || 0;
-            }
-          }
-        });
+        );
 
         setSummary(financialSummary);
       } catch (error) {

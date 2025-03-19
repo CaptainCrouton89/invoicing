@@ -24,7 +24,7 @@ import { toast } from "sonner";
 type FrequentClient = {
   id: string;
   name: string;
-  email?: string;
+  email?: string | null;
   default_items?: {
     description: string;
     quantity: number;

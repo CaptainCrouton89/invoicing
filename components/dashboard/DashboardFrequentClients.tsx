@@ -12,7 +12,7 @@ import { toast } from "sonner";
 type FrequentClient = {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   invoice_count: number;
   total_billed: number;
 };

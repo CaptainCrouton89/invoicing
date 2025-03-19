@@ -88,7 +88,7 @@ export default async function ClientsPage() {
                   </TableCell>
                   <TableCell>{client.contact_person || "-"}</TableCell>
                   <TableCell>{client.email || "-"}</TableCell>
-                  <TableCell>{formatPhoneNumber(client.phone)}</TableCell>
+                  <TableCell>{formatPhoneNumber(client.phone || "")}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button

@@ -1,9 +1,11 @@
 import InvoiceForm from "@/components/InvoiceForm";
-import { Client } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 
-async function getClient(id: string): Promise<Client | null> {
+async function getClient(
+  id: string
+): Promise<Database["public"]["Tables"]["clients"]["Row"] | null> {
   const supabase = await createClient();
 
   const {
@@ -25,14 +27,12 @@ async function getClient(id: string): Promise<Client | null> {
     return null;
   }
 
-  return data as Client;
+  return data;
 }
 
-export default async function NewClientInvoicePage(
-  props: {
-    params: Promise<{ id: string }>;
-  }
-) {
+export default async function NewClientInvoicePage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = await props.params;
   const client = await getClient(params.id);
 

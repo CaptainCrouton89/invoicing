@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Settings } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type SettingsFormProps = {
-  initialSettings?: Settings;
+  initialSettings?: Database["public"]["Tables"]["settings"]["Row"];
 };
 
 const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
@@ -22,7 +22,9 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<
+    Database["public"]["Tables"]["settings"]["Row"] | null
+  >(null);
 
   useEffect(() => {
     if (initialSettings) {
@@ -55,15 +57,16 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
         setSettings(data);
       } else {
         // Create default settings if none exist
-        const defaultSettings: Partial<Settings> = {
-          user_id: user.id,
-          business_name: "",
-          invoice_prefix: "INV-",
-          next_invoice_number: 1001,
-          tax_rate: 0,
-          theme_color: "#3b82f6", // Default blue
-          footer_notes: "Thank you for your business.",
-        };
+        const defaultSettings: Database["public"]["Tables"]["settings"]["Insert"] =
+          {
+            user_id: user.id,
+            business_name: "",
+            invoice_prefix: "INV-",
+            next_invoice_number: 1001,
+            tax_rate: 0,
+            theme_color: "#3b82f6", // Default blue
+            footer_notes: "Thank you for your business.",
+          };
 
         const { data: newSettings, error: createError } = await supabase
           .from("settings")
@@ -234,7 +237,7 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
         throw new Error("Failed to update settings");
       }
 
-      setSettings((prev) => (prev ? { ...prev, logo_url: undefined } : null));
+      setSettings((prev) => (prev ? { ...prev, logo_url: null } : null));
       toast.success("Logo removed successfully");
     } catch (error) {
       console.error("Error removing logo:", error);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Client, Invoice, InvoiceItem } from "@/lib/types";
+import { Database } from "@/lib/database.types";
 import { formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import {
   Document,
@@ -134,9 +134,9 @@ const styles = StyleSheet.create({
 });
 
 type InvoicePDFProps = {
-  invoice: Invoice & {
-    items: InvoiceItem[];
-    clients: Client;
+  invoice: Database["public"]["Tables"]["invoices"]["Row"] & {
+    items: Database["public"]["Tables"]["invoice_items"]["Row"][];
+    clients: Database["public"]["Tables"]["clients"]["Row"];
   };
   businessInfo: {
     name: string;
