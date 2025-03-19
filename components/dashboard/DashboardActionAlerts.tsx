@@ -307,15 +307,12 @@ export default function DashboardActionAlerts() {
       {/* Draft Invoices */}
       {alerts.draftInvoices.length > 0 && (
         <div className="p-4">
-          <h3 className="text-amber-600 dark:text-amber-400 font-medium mb-3">
+          <h3 className="text-primary font-medium mb-3">
             Draft Invoices ({alerts.draftInvoices.length})
           </h3>
           <div className="space-y-3">
             {alerts.draftInvoices.map((invoice) => (
-              <Card
-                key={invoice.id}
-                className="bg-amber-50 dark:bg-amber-900/20"
-              >
+              <Card key={invoice.id} className="bg-primary/5">
                 <CardContent className="p-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                     <div className="mb-2 sm:mb-0">

@@ -40,6 +40,7 @@ export interface Invoice {
   notes?: string;
   created_at: string;
   updated_at: string;
+  paid_date?: string;
 }
 
 export interface InvoiceItem {

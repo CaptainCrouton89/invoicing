@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Invoice } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ export default function DashboardFinancialSummary() {
   const { supabase, user } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
+  console.log(summary);
 
   useEffect(() => {
     async function fetchFinancialSummary() {
@@ -56,6 +58,8 @@ export default function DashboardFinancialSummary() {
           throw new Error("Failed to fetch invoice data");
         }
 
+        console.log(invoices);
+
         // Calculate financial summary
         const financialSummary = {
           outstanding: 0, // All sent but not paid
@@ -66,7 +70,7 @@ export default function DashboardFinancialSummary() {
           draft_total: 0,
         };
 
-        invoices.forEach((invoice) => {
+        invoices.forEach((invoice: Invoice) => {
           // Draft invoices
           if (invoice.status === "draft") {
             financialSummary.draft_total += invoice.total_amount || 0;
@@ -84,9 +88,11 @@ export default function DashboardFinancialSummary() {
 
           // Paid invoices
           if (invoice.status === "paid") {
+            console.log(invoice);
             // Check if paid in last 30 days
             if (invoice.paid_date && invoice.paid_date >= date30DaysAgoStr) {
               financialSummary.paid_last_30_days += invoice.total_amount || 0;
+              console.log(invoice.paid_date);
             }
 
             // Check if paid in last 90 days
@@ -134,42 +140,47 @@ export default function DashboardFinancialSummary() {
   return (
     <div className="p-4">
       <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4">
+        <Card className="py-2">
+          <CardContent>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               Outstanding
             </p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-lg font-semibold">
               {formatCurrency(summary.outstanding)}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="py-2">
+          <CardContent>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               Overdue
             </p>
-            <p className="text-lg font-semibold text-red-600 dark:text-red-400">
+            <p
+              className="text-lg font-semibold"
+              style={{
+                color: summary.overdue > 0 ? "var(--destructive)" : "inherit",
+              }}
+            >
               {formatCurrency(summary.overdue)}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="py-2">
+          <CardContent>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               Last 30 days
             </p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-lg font-semibold">
               {formatCurrency(summary.paid_last_30_days)}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="py-2">
+          <CardContent>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               Last 90 days
             </p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-lg font-semibold">
               {formatCurrency(summary.paid_last_90_days)}
             </p>
           </CardContent>
@@ -177,13 +188,13 @@ export default function DashboardFinancialSummary() {
       </div>
 
       <Card className="mt-4">
-        <CardContent className="p-4">
+        <CardContent>
           <div className="flex justify-between items-center">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                 This Year
               </p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-lg font-semibold">
                 {formatCurrency(summary.total_this_year)}
               </p>
             </div>

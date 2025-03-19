@@ -396,9 +396,7 @@ export default function InvoiceForm({
             </div>
 
             <div>
-              <Label htmlFor="status">
-                Status
-              </Label>
+              <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status as "draft" | "sent" | "paid"}
                 onValueChange={(value: "draft" | "sent" | "paid") => {
@@ -455,12 +453,7 @@ export default function InvoiceForm({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Invoice Items</CardTitle>
-          <Button
-            type="button"
-            onClick={addItem}
-            size="sm"
-            variant="default"
-          >
+          <Button type="button" onClick={addItem} size="sm" variant="default">
             Add Item
           </Button>
         </CardHeader>
@@ -499,7 +492,7 @@ export default function InvoiceForm({
                         step="1"
                         value={item.quantity || ""}
                         onChange={(e) => handleItemChange(index, e)}
-                        className="w-20 border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
+                        className="w-20 border-0 focus:outline-none focus:ring-0"
                         required
                       />
                     </TableCell>
@@ -511,13 +504,11 @@ export default function InvoiceForm({
                         step="0.01"
                         value={item.unit_price || ""}
                         onChange={(e) => handleItemChange(index, e)}
-                        className="w-24 border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
+                        className="w-24 border-0 focus:outline-none focus:ring-0"
                         required
                       />
                     </TableCell>
-                    <TableCell>
-                      {formatCurrency(item.amount || 0)}
-                    </TableCell>
+                    <TableCell>{formatCurrency(item.amount || 0)}</TableCell>
                     <TableCell>
                       <Button
                         type="button"
@@ -587,9 +578,7 @@ export default function InvoiceForm({
         </CardHeader>
         <CardContent>
           <div>
-            <Label htmlFor="notes">
-              Notes
-            </Label>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
               name="notes"
@@ -604,18 +593,10 @@ export default function InvoiceForm({
       </Card>
 
       <div className="flex items-center justify-end space-x-3">
-        <Button
-          type="button"
-          onClick={() => router.back()}
-          variant="outline"
-        >
+        <Button type="button" onClick={() => router.back()} variant="outline">
           Cancel
         </Button>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          variant="default"
-        >
+        <Button type="submit" disabled={isSubmitting} variant="default">
           {isSubmitting
             ? "Saving..."
             : mode === "create"

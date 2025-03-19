@@ -1,5 +1,6 @@
 "use client";
 
+import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
 import InvoiceDownloadButton from "@/components/InvoiceDownloadButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { BusinessInfo } from "@/lib/email";
 import { Client, Invoice, InvoiceItem } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -220,6 +221,13 @@ export default function InvoiceDetailPage() {
           <Button variant="outline" asChild>
             <Link href={`/invoices/${invoice.id}/edit`}>Edit</Link>
           </Button>
+
+          <DeleteInvoiceButton
+            invoiceId={invoice.id}
+            variant="destructive"
+            size="default"
+          />
+
           <Button onClick={handleSendEmail} disabled={isSending}>
             {isSending ? (
               <>
@@ -307,7 +315,7 @@ export default function InvoiceDetailPage() {
                 {invoice.clients.phone && (
                   <p>
                     <span className="font-medium">Phone:</span>{" "}
-                    {invoice.clients.phone}
+                    {formatPhoneNumber(invoice.clients.phone)}
                   </p>
                 )}
                 {invoice.clients.address && (

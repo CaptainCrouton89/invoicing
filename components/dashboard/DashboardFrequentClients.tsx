@@ -119,7 +119,7 @@ export default function DashboardFrequentClients() {
         {clients.map((client) => (
           <Card
             key={client.id}
-            className="hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700"
+            className="hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700 bg-primary/5"
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">

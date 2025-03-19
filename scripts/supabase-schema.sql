@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   issue_date DATE NOT NULL,
   due_date DATE NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('draft', 'sent', 'paid', 'overdue')),
+  paid_date DATE,
   subtotal DECIMAL(10, 2) NOT NULL,
   tax_amount DECIMAL(10, 2) NOT NULL,
   discount_amount DECIMAL(10, 2) NOT NULL,
@@ -189,4 +190,31 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Trigger to automatically create profile and settings on user creation
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user(); 
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Create a trigger function to set paid date when invoice status is changed to 'paid'
+CREATE OR REPLACE FUNCTION public.set_invoice_paid_date() 
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Check if the status is being updated to 'paid'
+  IF (NEW.status = 'paid' AND (OLD.status != 'paid' OR OLD.status IS NULL)) THEN
+    -- Set the paid_date to the current date
+    NEW.paid_date := CURRENT_DATE;
+  -- If the status is changed from 'paid' to something else, clear the paid_date
+  ELSIF (OLD.status = 'paid' AND NEW.status != 'paid') THEN
+    NEW.paid_date := NULL;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create a trigger to automatically update the paid_date when invoice status changes
+CREATE OR REPLACE TRIGGER on_invoice_status_update
+  BEFORE UPDATE OF status ON invoices
+  FOR EACH ROW EXECUTE PROCEDURE public.set_invoice_paid_date();
+
+-- Also trigger on insert in case an invoice is created with 'paid' status
+CREATE OR REPLACE TRIGGER on_invoice_insert
+  BEFORE INSERT ON invoices
+  FOR EACH ROW EXECUTE PROCEDURE public.set_invoice_paid_date(); 
