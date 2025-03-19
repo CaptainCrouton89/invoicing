@@ -1,16 +1,14 @@
+"use client";
+
 import { signOutAction } from "@/app/actions";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { createClient } from "@/utils/supabase/client";
+import { useUser } from "@/utils/supabase/use-user";
 import Link from "next/link";
 import { ThemeToggleWrapper } from "./theme-toggle-wrapper";
 import { Button } from "./ui/button";
 
-export default async function AuthButton() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function AuthButton() {
+  const { user, loading } = useUser();
 
   if (!hasEnvVars) {
     return (
@@ -41,6 +39,18 @@ export default async function AuthButton() {
       </>
     );
   }
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-4">
+        <ThemeToggleWrapper />
+        <Button size="sm" variant="outline" disabled>
+          Loading...
+        </Button>
+      </div>
+    );
+  }
+
   return user ? (
     <div className="flex items-center gap-4">
       Hey, {user.email}!
