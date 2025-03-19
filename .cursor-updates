@@ -17,3 +17,4 @@
 - Implemented email sending capabilities to share invoices with clients
 - Created detailed invoice view page with options to download, email, and update status
 - Developed settings management with business information, logo upload, and theme customization
+- Optimized application for mobile devices with responsive layouts and mobile-friendly navigation
