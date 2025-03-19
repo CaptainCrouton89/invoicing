@@ -33,8 +33,11 @@ export default function RootLayout({
           property="og:description"
           content="A simple, free invoicing app for freelancers and small businesses"
         />
-        <meta property="og:url" content="https://invoicelight.com" />
-        <meta property="og:image" content="/logo.png" />
+        <meta
+          property="og:url"
+          content="https://invoicelight.rhyneerconsulting.com"
+        />
+        <meta property="og:image" content="/logo.jpg" />
       </head>
       <body className="bg-background text-foreground min-h-screen flex flex-col">
         <ThemeProvider
