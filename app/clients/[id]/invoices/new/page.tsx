@@ -28,11 +28,12 @@ async function getClient(id: string): Promise<Client | null> {
   return data as Client;
 }
 
-export default async function NewClientInvoicePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function NewClientInvoicePage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const client = await getClient(params.id);
 
   if (!client) {

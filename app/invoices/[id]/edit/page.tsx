@@ -37,11 +37,12 @@ async function getInvoice(id: string): Promise<EnhancedInvoice | null> {
   return data as EnhancedInvoice;
 }
 
-export default async function EditInvoicePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function EditInvoicePage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const supabase = await createClient();
 
   // Check if the user is authenticated
