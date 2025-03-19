@@ -16,3 +16,4 @@
 - Added PDF generation and export functionality for invoices
 - Implemented email sending capabilities to share invoices with clients
 - Created detailed invoice view page with options to download, email, and update status
+- Developed settings management with business information, logo upload, and theme customization

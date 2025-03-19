@@ -63,6 +63,12 @@ export interface Settings {
   tax_rate?: number;
   theme_color?: string;
   footer_notes?: string;
+  business_name?: string;
+  business_address?: string;
+  business_email?: string;
+  business_phone?: string;
+  tax_id?: string;
+  logo_url?: string;
   created_at: string;
   updated_at?: string;
 }
