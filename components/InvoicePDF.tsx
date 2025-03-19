@@ -1,7 +1,7 @@
 "use client";
 
 import { Client, Invoice, InvoiceItem } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatPhoneNumber } from "@/lib/utils";
 import {
   Document,
   Page,
@@ -166,7 +166,9 @@ const InvoicePDF = ({ invoice, businessInfo, logoUrl }: InvoicePDFProps) => {
             <View>
               <Text style={styles.title}>{businessInfo.name}</Text>
               {businessInfo.address && <Text>{businessInfo.address}</Text>}
-              {businessInfo.phone && <Text>Phone: {businessInfo.phone}</Text>}
+              {businessInfo.phone && (
+                <Text>Phone: {formatPhoneNumber(businessInfo.phone)}</Text>
+              )}
               {businessInfo.email && <Text>Email: {businessInfo.email}</Text>}
               {businessInfo.taxId && <Text>Tax ID: {businessInfo.taxId}</Text>}
             </View>
@@ -211,7 +213,7 @@ const InvoicePDF = ({ invoice, businessInfo, logoUrl }: InvoicePDFProps) => {
               <Text>Email: {invoice.clients.email}</Text>
             )}
             {invoice.clients.phone && (
-              <Text>Phone: {invoice.clients.phone}</Text>
+              <Text>Phone: {formatPhoneNumber(invoice.clients.phone)}</Text>
             )}
           </View>
 

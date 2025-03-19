@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { Client, Invoice, InvoiceItem } from "./types";
-import { formatCurrency } from "./utils";
+import { formatCurrency, formatPhoneNumber } from "./utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -55,9 +55,9 @@ export const sendInvoiceEmail = async (
         <title>Invoice ${invoice.invoice_number}</title>
         <style>
           body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
+            line-height: 1.5;
             margin: 0;
             padding: 0;
           }
@@ -68,12 +68,17 @@ export const sendInvoiceEmail = async (
           }
           .header {
             text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
             margin-bottom: 20px;
           }
           .invoice-info {
             margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
           }
-          .invoice-details, .client-details {
+          .client-details {
             margin-bottom: 20px;
           }
           table {
@@ -81,48 +86,61 @@ export const sendInvoiceEmail = async (
             border-collapse: collapse;
             margin-bottom: 20px;
           }
-          th {
+          table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+          }
+          table th {
             background-color: #f2f2f2;
             text-align: left;
-            padding: 10px;
-            border: 1px solid #ddd;
-            font-weight: 500;
-          }
-          td {
-            padding: 10px;
-            border: 1px solid #ddd;
           }
           .totals {
-            width: 50%;
-            margin-left: auto;
+            margin-top: 20px;
+            text-align: right;
           }
           .footer {
-            text-align: center;
             margin-top: 30px;
-            font-size: 12px;
+            text-align: center;
             color: #777;
+            font-size: 12px;
+          }
+          .cta {
+            text-align: center;
+            margin: 30px 0;
           }
           .button {
             display: inline-block;
-            background-color: #4CAF50;
+            padding: 10px 20px;
+            background-color: #4f46e5;
             color: white;
-            padding: 10px 15px;
             text-decoration: none;
             border-radius: 4px;
-            margin-top: 20px;
+            font-weight: bold;
           }
-          tr:hover {
-            background-color: #f9f9f9;
+          h2 {
+            color: #4f46e5;
+          }
+          .company-details {
+            margin-bottom: 20px;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h2>${businessInfo.name}</h2>
+            <h1>Invoice from ${businessInfo.name}</h1>
+            <p>Invoice #${invoice.invoice_number}</p>
+          </div>
+          
+          <p>Hello${invoice.clients.contact_person ? ` ${invoice.clients.contact_person}` : ""},</p>
+          
+          <p>I'm sending you the invoice #${invoice.invoice_number} for ${formatCurrency(invoice.total_amount)}.</p>
+          
+          <div class="company-details">
+            <h3>${businessInfo.name}</h3>
             ${businessInfo.address ? `<p>${businessInfo.address}</p>` : ""}
             ${businessInfo.email ? `<p>Email: ${businessInfo.email}</p>` : ""}
-            ${businessInfo.phone ? `<p>Phone: ${businessInfo.phone}</p>` : ""}
+            ${businessInfo.phone ? `<p>Phone: ${formatPhoneNumber(businessInfo.phone)}</p>` : ""}
           </div>
           
           <div class="invoice-info">
@@ -137,7 +155,7 @@ export const sendInvoiceEmail = async (
             <p><strong>${invoice.clients.name}</strong></p>
             ${invoice.clients.address ? `<p>${invoice.clients.address}</p>` : ""}
             ${invoice.clients.email ? `<p>Email: ${invoice.clients.email}</p>` : ""}
-            ${invoice.clients.phone ? `<p>Phone: ${invoice.clients.phone}</p>` : ""}
+            ${invoice.clients.phone ? `<p>Phone: ${formatPhoneNumber(invoice.clients.phone)}</p>` : ""}
           </div>
           
           <table>

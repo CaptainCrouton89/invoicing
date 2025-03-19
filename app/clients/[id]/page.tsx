@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Client } from "@/lib/types";
+import { formatPhoneNumber } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -73,7 +74,7 @@ export default async function ClientDetailPage({
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Phone:</span>{" "}
-                  {client.phone || "—"}
+                  {formatPhoneNumber(client.phone)}
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Address:</span>{" "}

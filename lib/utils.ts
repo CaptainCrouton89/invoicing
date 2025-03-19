@@ -13,6 +13,28 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
+ * Format a phone number to (xxx) xxx-xxxx format
+ * Handles different input formats and cleans up non-numeric characters
+ */
+export function formatPhoneNumber(phoneNumber: string | undefined): string {
+  if (!phoneNumber) return "—";
+
+  // Strip all non-numeric characters
+  const cleaned = phoneNumber.replace(/\D/g, "");
+
+  // Check if we have a valid 10-digit US phone number
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  } else if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    // Handle numbers with country code 1
+    return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+  }
+
+  // Return original if not matching expected format
+  return phoneNumber;
+}
+
+/**
  * Calculate the number of days overdue from a due date
  * Returns a positive number for overdue invoices (days overdue)
  * Returns a negative number for upcoming invoices (days until due)

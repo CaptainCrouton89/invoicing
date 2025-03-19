@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatPhoneNumber } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
@@ -87,7 +88,7 @@ export default async function ClientsPage() {
                   </TableCell>
                   <TableCell>{client.contact_person || "-"}</TableCell>
                   <TableCell>{client.email || "-"}</TableCell>
-                  <TableCell>{client.phone || "-"}</TableCell>
+                  <TableCell>{formatPhoneNumber(client.phone)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button
