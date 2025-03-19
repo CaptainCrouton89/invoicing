@@ -1,6 +1,6 @@
 import { Invoice } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
 type InvoiceWithClient = Invoice & {

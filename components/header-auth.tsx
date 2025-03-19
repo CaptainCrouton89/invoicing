@@ -1,6 +1,6 @@
 import { signOutAction } from "@/app/actions";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { ThemeToggleWrapper } from "./theme-toggle-wrapper";
 import { Button } from "./ui/button";
