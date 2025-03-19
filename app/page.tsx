@@ -303,9 +303,6 @@ export default function Home() {
             <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
         </div>
-        <div className="text-center mt-8 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} • Open-source and free forever</p>
-        </div>
       </section>
     </div>
   );
