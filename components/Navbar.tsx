@@ -55,31 +55,31 @@ export default function Navbar() {
       <div className="mx-auto container h-full flex justify-between items-center text-sm">
         <div className="flex items-center gap-8">
           <Link href="/" className="font-bold text-lg">
-            Invoicing App
+            <span className="text-primary">Invoice</span>Light
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link
               href="/dashboard"
-              className={`hover:text-blue-500 transition-colors ${
-                isActiveLink("/dashboard") ? "text-blue-500 font-medium" : ""
+              className={`hover:text-accent transition-colors ${
+                isActiveLink("/dashboard") ? "text-primary font-medium" : ""
               }`}
             >
               Dashboard
             </Link>
             <Link
               href="/invoices"
-              className={`hover:text-blue-500 transition-colors ${
-                isActiveLink("/invoices") ? "text-blue-500 font-medium" : ""
+              className={`hover:text-accent transition-colors ${
+                isActiveLink("/invoices") ? "text-primary font-medium" : ""
               }`}
             >
               Invoices
             </Link>
             <Link
               href="/clients"
-              className={`hover:text-blue-500 transition-colors ${
-                isActiveLink("/clients") ? "text-blue-500 font-medium" : ""
+              className={`hover:text-accent transition-colors ${
+                isActiveLink("/clients") ? "text-primary font-medium" : ""
               }`}
             >
               Clients
