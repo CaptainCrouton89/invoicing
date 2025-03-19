@@ -1,104 +1,123 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Independent Contractor Invoicing
+
+<div align="center">
+  <img src="/public/demo.png" alt="Screenshot of the Invoicing App" width="600" />
+</div>
 
 <p align="center">
- The fastest way to build apps with Next.js and Supabase
+  A simple, lightweight invoicing tool created specifically for independent contractors and freelancers.
 </p>
 
 <p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
+  <a href="#features">Features</a> ·
+  <a href="#getting-started">Getting Started</a> ·
+  <a href="#tech-stack">Tech Stack</a> ·
+  <a href="#running-locally">Running Locally</a> ·
+  <a href="#deployment">Deployment</a> ·
+  <a href="#contributing">Contributing</a> ·
+  <a href="#license">License</a>
 </p>
-<br/>
 
 ## Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+- **Simple Invoicing**: Create clean, professional invoices in seconds
+- **Client Management**: Store and manage your client information
+- **PDF Generation**: Download and share invoices as professional PDF documents
+- **Payment Tracking**: Keep track of paid and unpaid invoices
+- **Lightweight & Fast**: Minimal interface with no unnecessary features
+- **Free Forever**: No subscriptions, no hidden fees, completely free
+- **Privacy Focused**: Your data stays on your device and with Supabase
 
-## Demo
+## Getting Started
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+Visit [invoicing-app-url.com](https://invoicing-app-url.com) to use the application without any installation.
 
-## Deploy to Vercel
+1. Create an account or sign in
+2. Enter your contractor details
+3. Add your clients
+4. Create and customize your invoices
+5. Download as PDF and send to clients
 
-Vercel deployment will guide you through creating a Supabase account and project.
+## Tech Stack
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+- **Frontend**: Next.js, React, Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Authentication**: Supabase Auth
+- **Database**: Supabase PostgreSQL
+- **PDF Generation**: React PDF
+- **Icons**: Lucide React
+- **Styling**: Tailwind CSS v4
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+## Running Locally
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+### Prerequisites
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+- Node.js (v18 or newer)
+- pnpm
+- A Supabase account and project
 
-## Clone and run locally
+### Setup
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
-
-2. Create a Next.js app using the Supabase Starter template npx command
-
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
-
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+1. Clone the repository:
 
    ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
+   git clone https://github.com/CaptainCrouton89/invoicing.git
+   cd invoicing
    ```
 
-3. Use `cd` to change into the app's directory
+2. Install dependencies:
 
    ```bash
-   cd with-supabase-app
+   pnpm install
    ```
 
-4. Rename `.env.example` to `.env.local` and update the following:
-
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
-
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
+3. Copy the environment variables:
 
    ```bash
-   npm run dev
+   cp .env.example .env.local
    ```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+4. Update `.env.local` with your Supabase credentials:
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ```
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+5. Start the development server:
 
-## Feedback and issues
+   ```bash
+   pnpm dev
+   ```
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## More Supabase examples
+## Deployment
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+This application can be easily deployed to Vercel:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CaptainCrouton89/invoicing)
+
+Make sure to add your Supabase environment variables in the Vercel dashboard.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Created By
+
+Built with ❤️ by [Silas Rhyneer](https://linkedin.com/in/silas-rhyneer) at [Rhyneer Consulting](https://rhyneerconsulting.com). This project is my contribution to making business life a little easier for independent contractors and freelancers.
+
+---
+
+© 2023-present · Open-source and free forever
