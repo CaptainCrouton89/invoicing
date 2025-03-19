@@ -85,6 +85,7 @@ export default function InvoiceDetailPage() {
             phone: settings.business_phone || "+1 234 567 890",
             email: settings.business_email || "contact@yourbusiness.com",
             taxId: settings.tax_id || "TAX-ID-12345",
+            logoUrl: settings.logo_url || "",
           });
         }
       } catch (error) {

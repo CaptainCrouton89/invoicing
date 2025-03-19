@@ -93,7 +93,7 @@ const InvoiceDownloadButton = ({
               img.onload = () => {
                 // Calculate logo dimensions maintaining aspect ratio
                 const maxLogoHeight = 60;
-                const maxLogoWidth = 180;
+                const maxLogoWidth = 60;
 
                 let logoWidth = img.width;
                 let logoHeight = img.height;
@@ -114,7 +114,7 @@ const InvoiceDownloadButton = ({
                 // Add logo to PDF
                 pdf.addImage(img, "JPEG", margin, 40, logoWidth, logoHeight);
 
-                // Adjust company header position based on logo
+                // No longer need to adjust company header position here
                 resolve();
               };
 
@@ -126,11 +126,12 @@ const InvoiceDownloadButton = ({
               img.src = businessInfo.logoUrl || ""; // Handle undefined case
             });
 
-            // After logo, adjust where company name starts
+            // After logo, position company name to the right of the logo
+            const logoWidth = 60; // Use the same max width as defined above
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.setFontSize(24);
             pdf.setFont("helvetica", "bold");
-            pdf.text(businessInfo.name, margin + 190, 60);
+            pdf.text(businessInfo.name, margin + logoWidth + 20, 60);
           } catch (logoError) {
             console.error("Error adding logo:", logoError);
             // Fallback to normal company header if logo fails
@@ -154,22 +155,24 @@ const InvoiceDownloadButton = ({
 
         // Company details - adjust position based on whether logo is present
         const companyStartY = businessInfo.logoUrl ? 80 : 70;
+        // If logo exists, align company info with the company name (to the right of the logo)
+        const companyInfoX = businessInfo.logoUrl ? margin + 60 + 20 : margin;
         let companyInfoY = companyStartY;
 
         if (businessInfo.address) {
-          pdf.text(businessInfo.address, margin, companyInfoY);
+          pdf.text(businessInfo.address, companyInfoX, companyInfoY);
           companyInfoY += 15;
         }
         if (businessInfo.email) {
-          pdf.text(`Email: ${businessInfo.email}`, margin, companyInfoY);
+          pdf.text(`Email: ${businessInfo.email}`, companyInfoX, companyInfoY);
           companyInfoY += 15;
         }
         if (businessInfo.phone) {
-          pdf.text(`Phone: ${businessInfo.phone}`, margin, companyInfoY);
+          pdf.text(`Phone: ${businessInfo.phone}`, companyInfoX, companyInfoY);
           companyInfoY += 15;
         }
         if (businessInfo.taxId) {
-          pdf.text(`Tax ID: ${businessInfo.taxId}`, margin, companyInfoY);
+          pdf.text(`Tax ID: ${businessInfo.taxId}`, companyInfoX, companyInfoY);
         }
 
         // Invoice header - right aligned
@@ -285,6 +288,45 @@ const InvoiceDownloadButton = ({
           colPositions.push(colPositions[i - 1] + colWidths[i - 1]);
         }
 
+        // Table headers - colored background
+        pdf.setFillColor(
+          lightGrayColor[0],
+          lightGrayColor[1],
+          lightGrayColor[2]
+        );
+        pdf.rect(margin, tableTop, contentWidth, 30, "F");
+
+        // Draw table border
+        pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
+        pdf.setLineWidth(0.5);
+
+        // Draw outer table border
+        pdf.rect(margin, tableTop, contentWidth, 30);
+
+        // Draw vertical lines for header
+        for (let i = 1; i < colPositions.length; i++) {
+          pdf.line(colPositions[i], tableTop, colPositions[i], tableTop + 30);
+        }
+
+        // Headers text
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(11);
+        pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+
+        const headers = ["Description", "Quantity", "Unit Price", "Amount"];
+        headers.forEach((header, i) => {
+          if (i === 0) {
+            pdf.text(header, colPositions[i] + 10, tableTop + 20);
+          } else {
+            const textWidth = pdf.getTextWidth(header);
+            pdf.text(
+              header,
+              colPositions[i] + colWidths[i] - textWidth - 10,
+              tableTop + 20
+            );
+          }
+        });
+
         // Table rows
         let rowY = tableTop + 30;
         const rowHeight = 30;
@@ -292,113 +334,7 @@ const InvoiceDownloadButton = ({
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(10);
 
-        // Calculate available height for table rows on first page
-        const firstPageMaxY = pageHeight - 50; // Leave room for footer
-        let availableHeight = firstPageMaxY - rowY;
-        let currentPage = 1;
-
-        // Add footer to all pages function
-        const addFooter = (pageNum: number) => {
-          pdf.setFont("helvetica", "normal");
-          pdf.setFontSize(10);
-          pdf.setTextColor(107, 114, 128); // gray-500
-
-          // Add page number
-          pdf.text(`Page ${pageNum}`, margin, pageHeight - 20);
-
-          // Thank you message
-          pdf.text(
-            "Thank you for your business!",
-            pageWidth / 2,
-            pageHeight - 30,
-            { align: "center" }
-          );
-
-          // Invoice number on each page for reference
-          pdf.text(
-            `Invoice #${invoice.invoice_number}`,
-            pageWidth - margin,
-            pageHeight - 20,
-            { align: "right" }
-          );
-        };
-
-        // Draw table header row function
-        const addTableHeader = (startY: number) => {
-          // Table headers - colored background
-          pdf.setFillColor(
-            lightGrayColor[0],
-            lightGrayColor[1],
-            lightGrayColor[2]
-          );
-          pdf.rect(margin, startY, contentWidth, 30, "F");
-
-          // Draw table border
-          pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-          pdf.setLineWidth(0.5);
-
-          // Draw outer table border
-          pdf.rect(margin, startY, contentWidth, 30);
-
-          // Draw vertical lines for header
-          for (let i = 1; i < colPositions.length; i++) {
-            pdf.line(colPositions[i], startY, colPositions[i], startY + 30);
-          }
-
-          // Headers text
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(11);
-          pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
-
-          const headers = ["Description", "Quantity", "Unit Price", "Amount"];
-          headers.forEach((header, i) => {
-            if (i === 0) {
-              pdf.text(header, colPositions[i] + 10, startY + 20);
-            } else {
-              const textWidth = pdf.getTextWidth(header);
-              pdf.text(
-                header,
-                colPositions[i] + colWidths[i] - textWidth - 10,
-                startY + 20
-              );
-            }
-          });
-
-          return startY + 30;
-        };
-
         invoice.items.forEach((item, index) => {
-          // Check if we need a new page
-          if (rowY + rowHeight > firstPageMaxY) {
-            // Add footer to current page
-            addFooter(currentPage);
-
-            // Add a new page
-            pdf.addPage();
-            currentPage++;
-
-            // Reset rowY for new page and add header
-            rowY = margin + 40; // Start lower on continuation pages to add mini-header
-
-            // Add mini header with invoice/client info
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(12);
-            pdf.text(
-              `Invoice #${invoice.invoice_number} (continued)`,
-              margin,
-              margin
-            );
-            pdf.setFontSize(10);
-            pdf.setFont("helvetica", "normal");
-            pdf.text(`${invoice.clients.name}`, margin, margin + 15);
-
-            // Add table header
-            rowY = addTableHeader(rowY + 20);
-
-            // Reset available height for new page
-            availableHeight = pageHeight - 50 - rowY;
-          }
-
           // Draw row borders
           pdf.rect(margin, rowY, contentWidth, rowHeight);
 
@@ -448,21 +384,6 @@ const InvoiceDownloadButton = ({
         });
 
         tableEndY = rowY;
-
-        // Check if we need a new page for totals section
-        const totalsHeight = 200; // Approximate height needed for totals, notes, etc.
-
-        if (tableEndY + totalsHeight > firstPageMaxY) {
-          // Add footer to current page
-          addFooter(currentPage);
-
-          // Add a new page
-          pdf.addPage();
-          currentPage++;
-
-          // Reset position for new page
-          tableEndY = margin + 40;
-        }
 
         // Totals section - right aligned with borders
         const totalsWidth = 200;
@@ -544,8 +465,18 @@ const InvoiceDownloadButton = ({
           pdf.text(splitNotes, margin, notesY + 20);
         }
 
-        // Add footer to the final page
-        addFooter(currentPage);
+        // Footer
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        pdf.setTextColor(107, 114, 128); // gray-500
+        pdf.text(
+          "Thank you for your business!",
+          pageWidth / 2,
+          pageHeight - 30,
+          {
+            align: "center",
+          }
+        );
 
         pdf.save(`Invoice-${invoice.invoice_number}.pdf`);
         toast.success("Invoice downloaded successfully");
@@ -608,14 +539,26 @@ const InvoiceDownloadButton = ({
         >
           {/* Invoice Header */}
           <div className="flex justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-blue-600">
-                {businessInfo.name}
-              </h1>
-              {businessInfo.address && <p>{businessInfo.address}</p>}
-              {businessInfo.phone && <p>Phone: {businessInfo.phone}</p>}
-              {businessInfo.email && <p>Email: {businessInfo.email}</p>}
-              {businessInfo.taxId && <p>Tax ID: {businessInfo.taxId}</p>}
+            <div className="flex">
+              {businessInfo.logoUrl && (
+                <div className="mr-4">
+                  <img
+                    src={businessInfo.logoUrl}
+                    alt="Business Logo"
+                    style={{ maxHeight: "60px", maxWidth: "150px" }}
+                    className="object-contain"
+                  />
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold text-blue-600">
+                  {businessInfo.name}
+                </h1>
+                {businessInfo.address && <p>{businessInfo.address}</p>}
+                {businessInfo.phone && <p>Phone: {businessInfo.phone}</p>}
+                {businessInfo.email && <p>Email: {businessInfo.email}</p>}
+                {businessInfo.taxId && <p>Tax ID: {businessInfo.taxId}</p>}
+              </div>
             </div>
             <div>
               <h2 className="text-xl font-bold">INVOICE</h2>
