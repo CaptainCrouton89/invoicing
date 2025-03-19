@@ -33,6 +33,7 @@ export interface Invoice {
   due_date: string;
   status: "draft" | "sent" | "paid" | "overdue";
   subtotal: number;
+  tax_rate?: number;
   tax_amount: number;
   discount_amount: number;
   total_amount: number;
