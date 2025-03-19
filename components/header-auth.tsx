@@ -53,7 +53,6 @@ export default function AuthButton() {
 
   return user ? (
     <div className="flex items-center gap-4">
-      Hey, {user.email}!
       <ThemeToggleWrapper />
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"}>

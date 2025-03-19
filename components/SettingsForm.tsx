@@ -157,7 +157,7 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
         throw new Error("Failed to remove logo");
       }
 
-      setSettings((prev) => (prev ? { ...prev, logo_url: null } : null));
+      setSettings((prev) => (prev ? { ...prev, logo_url: undefined } : null));
       toast.success("Logo removed successfully");
     } catch (error) {
       console.error("Error removing logo:", error);
