@@ -366,6 +366,42 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
                       </svg>
                     </div>
                   )}
+
+                  <div className="flex flex-col w-full gap-2 mt-2">
+                    <input
+                      type="file"
+                      id="logo"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById("logo")?.click()}
+                        disabled={isUploading}
+                        className="w-full"
+                      >
+                        {isUploading ? "Uploading..." : "Upload Logo"}
+                      </Button>
+
+                      {settings.logo_url && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={handleRemoveLogo}
+                          disabled={isUploading}
+                          className="w-full"
+                        >
+                          Remove Logo
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-1">
+                      Maximum size: 2MB. Recommended format: PNG or JPG.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
