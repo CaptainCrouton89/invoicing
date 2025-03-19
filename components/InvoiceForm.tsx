@@ -1,5 +1,25 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { Client, Invoice, InvoiceItem } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
@@ -342,253 +362,266 @@ export default function InvoiceForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium mb-4">Invoice Details</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Invoice Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="client_id">
+                Client <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={formData.client_id}
+                onValueChange={(value) => {
+                  setFormData({
+                    ...formData,
+                    client_id: value,
+                  });
+                }}
+                disabled={isLoadingClients || Boolean(client)}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="client_id" className="block text-sm font-medium">
-              Client <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="client_id"
-              name="client_id"
-              value={formData.client_id}
-              onChange={handleChange}
-              disabled={isLoadingClients || Boolean(client)}
-              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-700"
-              required
-            >
-              <option value="">Select a client</option>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name}
-                </option>
-              ))}
-            </select>
+            <div>
+              <Label htmlFor="status">
+                Status
+              </Label>
+              <Select
+                value={formData.status as "draft" | "sent" | "paid"}
+                onValueChange={(value: "draft" | "sent" | "paid") => {
+                  setFormData({
+                    ...formData,
+                    status: value,
+                  });
+                }}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="issue_date">
+                Issue Date <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="issue_date"
+                name="issue_date"
+                type="date"
+                required
+                value={formData.issue_date}
+                onChange={handleChange}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="due_date">
+                Due Date <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="due_date"
+                name="due_date"
+                type="date"
+                required
+                value={formData.due_date}
+                onChange={handleChange}
+                className="mt-1"
+              />
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium">
-              Status
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-            >
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="issue_date" className="block text-sm font-medium">
-              Issue Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="issue_date"
-              name="issue_date"
-              type="date"
-              required
-              value={formData.issue_date}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="due_date" className="block text-sm font-medium">
-              Due Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="due_date"
-              name="due_date"
-              type="date"
-              required
-              value={formData.due_date}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Invoice Items</h2>
-          <button
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Invoice Items</CardTitle>
+          <Button
             type="button"
             onClick={addItem}
-            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            size="sm"
+            variant="default"
           >
             Add Item
-          </button>
-        </div>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Unit Price</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Input
+                        name="description"
+                        value={item.description || ""}
+                        onChange={(e) => handleItemChange(index, e)}
+                        placeholder="Item description"
+                        className="w-full border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
+                        required
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        name="quantity"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={item.quantity || ""}
+                        onChange={(e) => handleItemChange(index, e)}
+                        className="w-20 border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
+                        required
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        name="unit_price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unit_price || ""}
+                        onChange={(e) => handleItemChange(index, e)}
+                        className="w-24 border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
+                        required
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrency(item.amount || 0)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        type="button"
+                        onClick={() => removeItem(index)}
+                        disabled={items.length === 1}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        Remove
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead>
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Quantity
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Unit Price
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {items.map((item, index) => (
-                <tr key={index}>
-                  <td className="px-4 py-3">
-                    <input
-                      name="description"
-                      value={item.description || ""}
-                      onChange={(e) => handleItemChange(index, e)}
-                      placeholder="Item description"
-                      className="w-full border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
-                      required
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <input
-                      name="quantity"
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={item.quantity || ""}
-                      onChange={(e) => handleItemChange(index, e)}
-                      className="w-20 border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
-                      required
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <input
-                      name="unit_price"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.unit_price || ""}
-                      onChange={(e) => handleItemChange(index, e)}
-                      className="w-24 border-0 p-0 bg-transparent focus:outline-none focus:ring-0"
-                      required
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-gray-300">
-                    {formatCurrency(item.amount || 0)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => removeItem(index)}
-                      disabled={items.length === 1}
-                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="mt-6 flex justify-end">
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="font-medium">Subtotal:</dt>
+                <dd>{formatCurrency(formData.subtotal || 0)}</dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="font-medium mr-4">Tax:</dt>
+                <dd className="flex items-center">
+                  <Input
+                    name="tax_amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.tax_amount || ""}
+                    onChange={(e) => handleNumberChange(e, true)}
+                    className="w-24 text-right"
+                  />
+                </dd>
+              </div>
+              <div className="flex justify-between items-center">
+                <dt className="font-medium mr-4">Discount:</dt>
+                <dd className="flex items-center">
+                  <Input
+                    name="discount_amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.discount_amount || ""}
+                    onChange={(e) => handleNumberChange(e, true)}
+                    className="w-24 text-right"
+                  />
+                </dd>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                <dt className="font-bold">Total:</dt>
+                <dd className="font-bold">
+                  {formatCurrency(formData.total_amount || 0)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="mt-6 flex justify-end">
-          <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="font-medium">Subtotal:</dt>
-              <dd>{formatCurrency(formData.subtotal || 0)}</dd>
-            </div>
-            <div className="flex justify-between items-center">
-              <dt className="font-medium mr-4">Tax:</dt>
-              <dd className="flex items-center">
-                <input
-                  name="tax_amount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.tax_amount || ""}
-                  onChange={(e) => handleNumberChange(e, true)}
-                  className="w-24 border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-right"
-                />
-              </dd>
-            </div>
-            <div className="flex justify-between items-center">
-              <dt className="font-medium mr-4">Discount:</dt>
-              <dd className="flex items-center">
-                <input
-                  name="discount_amount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.discount_amount || ""}
-                  onChange={(e) => handleNumberChange(e, true)}
-                  className="w-24 border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-right"
-                />
-              </dd>
-            </div>
-            <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
-              <dt className="font-bold">Total:</dt>
-              <dd className="font-bold">
-                {formatCurrency(formData.total_amount || 0)}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 className="text-lg font-medium mb-4">Additional Information</h2>
-
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium">
-            Notes
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows={3}
-            value={formData.notes || ""}
-            onChange={handleChange}
-            placeholder="Additional notes or terms of service"
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-          />
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Additional Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <Label htmlFor="notes">
+              Notes
+            </Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              rows={3}
+              value={formData.notes || ""}
+              onChange={handleChange}
+              placeholder="Additional notes or terms of service"
+              className="mt-1"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex items-center justify-end space-x-3">
-        <button
+        <Button
           type="button"
           onClick={() => router.back()}
-          className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+          variant="outline"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="default"
         >
           {isSubmitting
             ? "Saving..."
             : mode === "create"
               ? "Create Invoice"
               : "Update Invoice"}
-        </button>
+        </Button>
       </div>
     </form>
   );

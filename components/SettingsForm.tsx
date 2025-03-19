@@ -1,12 +1,16 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Settings } from "@/lib/types";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 type SettingsFormProps = {
   initialSettings?: Settings;
@@ -254,12 +258,7 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
         <p className="text-gray-500">
           Error loading settings. Please try again.
         </p>
-        <button
-          onClick={fetchSettings}
-          className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Retry
-        </button>
+        <Button onClick={fetchSettings}>Retry</Button>
       </div>
     );
   }
@@ -275,96 +274,69 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label
-                  htmlFor="business_name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Name
-                </label>
-                <input
+                <Label htmlFor="business_name">Business Name</Label>
+                <Input
                   id="business_name"
                   name="business_name"
                   type="text"
                   value={settings.business_name || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="business_address"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Address
-                </label>
-                <textarea
+                <Label htmlFor="business_address">Business Address</Label>
+                <Textarea
                   id="business_address"
                   name="business_address"
                   value={settings.business_address || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="business_email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Email
-                </label>
-                <input
+                <Label htmlFor="business_email">Business Email</Label>
+                <Input
                   id="business_email"
                   name="business_email"
                   type="email"
                   value={settings.business_email || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="business_phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Phone
-                </label>
-                <input
+                <Label htmlFor="business_phone">Business Phone</Label>
+                <Input
                   id="business_phone"
                   name="business_phone"
                   type="text"
                   value={settings.business_phone || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="tax_id"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Tax ID / Business Number
-                </label>
-                <input
+                <Label htmlFor="tax_id">Tax ID / Business Number</Label>
+                <Input
                   id="tax_id"
                   name="tax_id"
                   type="text"
                   value={settings.tax_id || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1"
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Business Logo
-                </label>
+                <Label>Business Logo</Label>
                 <div className="flex flex-col items-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
                   {settings.logo_url ? (
                     <div className="relative w-full h-40 mb-4">
@@ -409,19 +381,14 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label
-                htmlFor="invoice_prefix"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Invoice Number Prefix
-              </label>
-              <input
+              <Label htmlFor="invoice_prefix">Invoice Number Prefix</Label>
+              <Input
                 id="invoice_prefix"
                 name="invoice_prefix"
                 type="text"
                 value={settings.invoice_prefix || ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1"
                 placeholder="INV-"
               />
               <p className="mt-1 text-sm text-gray-500">
@@ -430,74 +397,56 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
             </div>
 
             <div>
-              <label
-                htmlFor="next_invoice_number"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Next Invoice Number
-              </label>
-              <input
+              <Label htmlFor="next_invoice_number">Next Invoice Number</Label>
+              <Input
                 id="next_invoice_number"
                 name="next_invoice_number"
                 type="number"
                 min="1"
                 value={settings.next_invoice_number || ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="default_payment_terms"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Default Payment Terms (Days)
-              </label>
-              <input
+              <Label htmlFor="default_payment_terms">
+                Default Payment Terms (days)
+              </Label>
+              <Input
                 id="default_payment_terms"
                 name="default_payment_terms"
                 type="number"
                 min="0"
                 value={settings.default_payment_terms || ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="tax_rate"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Default Tax Rate (%)
-              </label>
-              <input
+              <Label htmlFor="tax_rate">Default Tax Rate (%)</Label>
+              <Input
                 id="tax_rate"
                 name="tax_rate"
                 type="number"
                 min="0"
-                step="0.01"
+                step="0.1"
                 value={settings.tax_rate || ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label
-                htmlFor="footer_notes"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Default Invoice Notes/Footer
-              </label>
-              <textarea
+              <Label htmlFor="footer_notes">Default Invoice Notes/Footer</Label>
+              <Textarea
                 id="footer_notes"
                 name="footer_notes"
                 rows={3}
                 value={settings.footer_notes || ""}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full"
                 placeholder="Thank you for your business!"
               />
             </div>
@@ -512,48 +461,24 @@ const SettingsForm = ({ initialSettings }: SettingsFormProps) => {
         </CardHeader>
         <CardContent>
           <div>
-            <label
-              htmlFor="theme_color"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Primary Color
-            </label>
-            <div className="flex items-center space-x-3">
-              <input
-                id="theme_color"
-                name="theme_color"
-                type="color"
-                value={settings.theme_color || "#3b82f6"}
-                onChange={handleColorChange}
-                className="h-10 w-10 border-none cursor-pointer rounded"
-              />
-              <input
-                type="text"
-                value={settings.theme_color || "#3b82f6"}
-                onChange={handleChange}
-                name="theme_color"
-                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <p className="mt-1 text-sm text-gray-500">
-              This color will be used for highlights in your invoices and
-              documents.
-            </p>
+            <Label htmlFor="theme_color">Theme Color</Label>
+            <Input
+              type="color"
+              id="theme_color"
+              name="theme_color"
+              value={settings.theme_color || "#3b82f6"}
+              onChange={handleChange}
+              className="w-full max-w-xs h-10"
+            />
           </div>
         </CardContent>
       </Card>
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isSaving}
-          className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-lg transition duration-200 ${
-            isSaving ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
+        <Button type="submit" disabled={isSaving} size="lg">
           {isSaving ? "Saving..." : "Save Settings"}
-        </button>
+        </Button>
       </div>
     </form>
   );

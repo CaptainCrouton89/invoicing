@@ -1,3 +1,14 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Invoice } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
@@ -45,16 +56,18 @@ async function getInvoices(): Promise<InvoiceWithClient[]> {
   return (data as InvoiceWithClient[]) || [];
 }
 
-function getStatusColor(status: string): string {
+function getStatusVariant(
+  status: string
+): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "paid":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      return "default";
     case "sent":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      return "secondary";
     case "overdue":
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      return "destructive";
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      return "outline";
   }
 }
 
@@ -69,143 +82,99 @@ export default async function InvoicesPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Invoices</h1>
-        <Link
-          href="/invoices/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200 whitespace-nowrap"
-        >
-          Create New Invoice
-        </Link>
+        <Button asChild>
+          <Link href="/invoices/new">Create New Invoice</Link>
+        </Button>
       </div>
 
       {invoices.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h2 className="text-xl font-medium mb-2">No invoices yet</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Create your first invoice to get started
-          </p>
-          <Link
-            href="/invoices/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200"
-          >
-            Create Your First Invoice
-          </Link>
-        </div>
+        <Card className="text-center py-6">
+          <CardHeader>
+            <h2 className="text-xl font-medium">No invoices yet</h2>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Create your first invoice to get started
+            </p>
+            <Button asChild>
+              <Link href="/invoices/new">Create Your First Invoice</Link>
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <>
           {/* Desktop Table (hidden on small screens) */}
-          <div className="hidden md:block bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+          <div className="hidden md:block shadow rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Invoice #
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Client
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Issue Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Due Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Amount
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Status
-                    </th>
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Invoice #</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Issue Date</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {invoices.map((invoice) => (
-                    <tr
-                      key={invoice.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <TableRow key={invoice.id}>
+                      <TableCell className="font-medium">
                         <Link
                           href={`/invoices/${invoice.id}`}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           {invoice.invoice_number}
                         </Link>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                        {invoice.clients.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                        {formatDate(invoice.issue_date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                        {formatDate(invoice.due_date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      </TableCell>
+                      <TableCell>{invoice.clients.name}</TableCell>
+                      <TableCell>{formatDate(invoice.issue_date)}</TableCell>
+                      <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                      <TableCell>
                         {formatCurrency(invoice.total_amount)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                            invoice.status
-                          )}`}
-                        >
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(invoice.status)}>
                           {invoice.status.charAt(0).toUpperCase() +
                             invoice.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
-                          <Link
-                            href={`/invoices/${invoice.id}`}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8"
+                            asChild
                           >
-                            View
-                          </Link>
-                          <Link
-                            href={`/invoices/${invoice.id}/edit`}
-                            className="text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
+                            <Link href={`/invoices/${invoice.id}`}>View</Link>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8"
+                            asChild
                           >
-                            Edit
-                          </Link>
+                            <Link href={`/invoices/${invoice.id}/edit`}>
+                              Edit
+                            </Link>
+                          </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
 
           {/* Mobile Card View (shown only on small screens) */}
           <div className="md:hidden space-y-4">
             {invoices.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden"
-              >
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <Card key={invoice.id}>
+                <CardHeader className="p-4 border-b flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium">
                       <Link
@@ -215,22 +184,18 @@ export default async function InvoicesPage() {
                         {invoice.invoice_number}
                       </Link>
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       {invoice.clients.name}
                     </p>
                   </div>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                      invoice.status
-                    )}`}
-                  >
+                  <Badge variant={getStatusVariant(invoice.status)}>
                     {invoice.status.charAt(0).toUpperCase() +
                       invoice.status.slice(1)}
-                  </span>
-                </div>
-                <div className="p-4 space-y-2">
+                  </Badge>
+                </CardHeader>
+                <CardContent className="p-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-muted-foreground">
                       Issue Date:
                     </span>
                     <span className="text-sm font-medium">
@@ -238,7 +203,7 @@ export default async function InvoicesPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-muted-foreground">
                       Due Date:
                     </span>
                     <span className="text-sm font-medium">
@@ -246,30 +211,23 @@ export default async function InvoicesPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-muted-foreground">
                       Amount:
                     </span>
                     <span className="text-sm font-medium">
                       {formatCurrency(invoice.total_amount)}
                     </span>
                   </div>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-750 p-3 flex justify-end space-x-2">
-                  <Link
-                    href={`/invoices/${invoice.id}`}
-                    className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
-                  >
-                    View
-                  </Link>
-                  <span className="text-gray-300 dark:text-gray-600">|</span>
-                  <Link
-                    href={`/invoices/${invoice.id}/edit`}
-                    className="text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300 text-sm font-medium"
-                  >
-                    Edit
-                  </Link>
-                </div>
-              </div>
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <Button variant="outline" size="sm" className="h-8" asChild>
+                      <Link href={`/invoices/${invoice.id}`}>View</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-8" asChild>
+                      <Link href={`/invoices/${invoice.id}/edit`}>Edit</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </>

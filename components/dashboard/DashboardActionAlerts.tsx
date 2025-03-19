@@ -1,11 +1,12 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 type AlertInvoice = {
   id: string;
@@ -280,18 +281,20 @@ export default function DashboardActionAlerts() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button
+                      <Button
                         onClick={() => handleMarkAsPaid(invoice.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded"
+                        variant="success"
+                        size="sm"
                       >
                         Mark Paid
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleSendReminder(invoice.id)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded"
+                        variant="default"
+                        size="sm"
                       >
                         Send Reminder
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -328,12 +331,11 @@ export default function DashboardActionAlerts() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/invoices/${invoice.id}/edit`}
-                        className="bg-amber-500 hover:bg-amber-600 text-white text-sm px-3 py-1 rounded"
-                      >
-                        Finalize
-                      </Link>
+                      <Button asChild variant="secondary" size="sm">
+                        <Link href={`/invoices/${invoice.id}/edit`}>
+                          Finalize
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -370,18 +372,20 @@ export default function DashboardActionAlerts() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button
+                      <Button
                         onClick={() => handleMarkAsPaid(invoice.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded"
+                        variant="success"
+                        size="sm"
                       >
                         Mark Paid
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleSendReminder(invoice.id)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded"
+                        variant="default"
+                        size="sm"
                       >
                         Send Reminder
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

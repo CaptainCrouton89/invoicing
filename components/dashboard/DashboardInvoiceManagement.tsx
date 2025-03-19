@@ -1,11 +1,20 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 type InvoiceItem = {
   id: string;
@@ -161,12 +170,9 @@ export default function DashboardInvoiceManagement() {
         <p className="text-gray-500 dark:text-gray-400">
           No recent invoices found
         </p>
-        <button
-          onClick={() => router.push("/invoices/new")}
-          className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-        >
+        <Button onClick={() => router.push("/invoices/new")} className="mt-4">
           Create Invoice
-        </button>
+        </Button>
       </div>
     );
   }
@@ -174,92 +180,55 @@ export default function DashboardInvoiceManagement() {
   return (
     <div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-              >
-                Invoice #
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-              >
-                Client
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell"
-              >
-                Date
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell"
-              >
-                Due
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-              >
-                Amount
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-              >
-                Status
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice #</TableHead>
+              <TableHead>Client</TableHead>
+              <TableHead className="hidden sm:table-cell">Date</TableHead>
+              <TableHead className="hidden sm:table-cell">Due</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {invoices.map((invoice) => (
-              <tr
+              <TableRow
                 key={invoice.id}
                 className="hover:bg-gray-50 dark:hover:bg-gray-750"
               >
-                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                <TableCell className="font-medium">
                   <Link
                     href={`/invoices/${invoice.id}`}
                     className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     {invoice.invoice_number}
                   </Link>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                  {invoice.client_name}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">
+                </TableCell>
+                <TableCell>{invoice.client_name}</TableCell>
+                <TableCell className="hidden sm:table-cell">
                   {formatDate(invoice.issue_date)}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 hidden sm:table-cell">
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
                   {formatDate(invoice.due_date)}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                  {formatCurrency(invoice.total_amount)}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                </TableCell>
+                <TableCell>{formatCurrency(invoice.total_amount)}</TableCell>
+                <TableCell>
                   <span
                     className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(invoice.status)}`}
                   >
                     {invoice.status.charAt(0).toUpperCase() +
                       invoice.status.slice(1)}
                   </span>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 text-right">
+                </TableCell>
+                <TableCell className="text-right">
                   <div className="flex items-center justify-end space-x-2">
                     <div className="relative">
-                      <button
-                        className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 rounded focus:outline-none"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                         onClick={() => {
                           const dropdown = document.getElementById(
                             `dropdown-${invoice.id}`
@@ -277,7 +246,7 @@ export default function DashboardInvoiceManagement() {
                         >
                           <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                         </svg>
-                      </button>
+                      </Button>
                       <div
                         id={`dropdown-${invoice.id}`}
                         className="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 py-1"
@@ -295,46 +264,52 @@ export default function DashboardInvoiceManagement() {
                           Edit Invoice
                         </Link>
                         {invoice.status !== "paid" && (
-                          <button
+                          <Button
                             onClick={() =>
                               handleUpdateStatus(invoice.id, "paid")
                             }
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-none"
                             disabled={isUpdating === invoice.id}
                           >
                             {isUpdating === invoice.id
                               ? "Updating..."
                               : "Mark as Paid"}
-                          </button>
+                          </Button>
                         )}
                         {invoice.status !== "sent" &&
                           invoice.status !== "paid" && (
-                            <button
+                            <Button
                               onClick={() =>
                                 handleUpdateStatus(invoice.id, "sent")
                               }
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                              variant="ghost"
+                              size="sm"
+                              className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-none"
                               disabled={isUpdating === invoice.id}
                             >
                               {isUpdating === invoice.id
                                 ? "Updating..."
                                 : "Mark as Sent"}
-                            </button>
+                            </Button>
                           )}
-                        <button
+                        <Button
                           onClick={() => handleSendEmail(invoice.id)}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-none"
                         >
                           Send Email
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <div className="p-4 text-center">
         <Link

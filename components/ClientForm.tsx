@@ -1,5 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Client } from "@/lib/types";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
@@ -107,128 +111,107 @@ export default function ClientForm({ client, mode }: ClientFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
       <div className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium">
+          <Label htmlFor="name">
             Client Name <span className="text-red-500">*</span>
-          </label>
-          <input
+          </Label>
+          <Input
             id="name"
             name="name"
             type="text"
             required
             value={formData.name || ""}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label htmlFor="contact_person" className="block text-sm font-medium">
-            Contact Person
-          </label>
-          <input
+          <Label htmlFor="contact_person">Contact Person</Label>
+          <Input
             id="contact_person"
             name="contact_person"
             type="text"
             value={formData.contact_person || ""}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             name="email"
             type="email"
             value={formData.email || ""}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium">
-            Phone
-          </label>
-          <input
+          <Label htmlFor="phone">Phone</Label>
+          <Input
             id="phone"
             name="phone"
             type="text"
             value={formData.phone || ""}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium">
-            Address
-          </label>
-          <textarea
+          <Label htmlFor="address">Address</Label>
+          <Textarea
             id="address"
             name="address"
             rows={3}
             value={formData.address || ""}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="default_payment_terms"
-            className="block text-sm font-medium"
-          >
+          <Label htmlFor="default_payment_terms">
             Default Payment Terms (days)
-          </label>
-          <input
+          </Label>
+          <Input
             id="default_payment_terms"
             name="default_payment_terms"
             type="number"
             min="0"
             value={formData.default_payment_terms || ""}
             onChange={handleNumberChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium">
-            Notes
-          </label>
-          <textarea
+          <Label htmlFor="notes">Notes</Label>
+          <Textarea
             id="notes"
             name="notes"
             rows={3}
             value={formData.notes || ""}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            className="mt-1"
           />
         </div>
       </div>
 
       <div className="flex items-center justify-end space-x-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
-        >
+        <Button type="button" onClick={() => router.back()} variant="outline">
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        </Button>
+        <Button type="submit" disabled={isSubmitting} variant="default">
           {isSubmitting
             ? "Saving..."
             : mode === "create"
               ? "Create Client"
               : "Update Client"}
-        </button>
+        </Button>
       </div>
     </form>
   );

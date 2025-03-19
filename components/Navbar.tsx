@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -101,8 +102,10 @@ export default function Navbar() {
 
         {/* Mobile Menu Button */}
         <div className="flex md:hidden items-center gap-2">
-          <button
+          <Button
             onClick={toggleMobileMenu}
+            variant="ghost"
+            size="sm"
             className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Toggle mobile menu"
           >
@@ -137,7 +140,7 @@ export default function Navbar() {
                 />
               </svg>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 

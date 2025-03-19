@@ -2,8 +2,6 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "next-themes";
 import { Geist } from "next/font/google";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { Toaster } from "sonner";
 import "./globals.css";
 const defaultUrl = process.env.VERCEL_URL
@@ -36,18 +34,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster />
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-1 w-full flex flex-col items-center">

@@ -1,3 +1,13 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
@@ -33,110 +43,85 @@ export default async function ClientsPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Clients</h1>
-        <Link
-          href="/clients/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200"
-        >
-          Add New Client
-        </Link>
+        <Button asChild>
+          <Link href="/clients/new">Add New Client</Link>
+        </Button>
       </div>
 
       {clients.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h2 className="text-xl font-medium mb-2">No clients yet</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Create your first client to get started
-          </p>
-          <Link
-            href="/clients/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200"
-          >
-            Add Your First Client
-          </Link>
-        </div>
+        <Card className="text-center py-6">
+          <CardHeader>
+            <h2 className="text-xl font-medium">No clients yet</h2>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Create your first client to get started
+            </p>
+            <Button asChild>
+              <Link href="/clients/new">Add Your First Client</Link>
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                >
-                  Contact Person
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                >
-                  Email
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                >
-                  Phone
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="shadow rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Contact Person</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {clients.map((client) => (
-                <tr
-                  key={client.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <TableRow key={client.id}>
+                  <TableCell className="font-medium">
                     <Link
                       href={`/clients/${client.id}`}
                       className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       {client.name}
                     </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {client.contact_person || "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {client.email || "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {client.phone || "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  </TableCell>
+                  <TableCell>{client.contact_person || "-"}</TableCell>
+                  <TableCell>{client.email || "-"}</TableCell>
+                  <TableCell>{client.phone || "-"}</TableCell>
+                  <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Link
-                        href={`/clients/${client.id}`}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8"
+                        asChild
                       >
-                        View
-                      </Link>
-                      <Link
-                        href={`/clients/${client.id}/edit`}
-                        className="text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
+                        <Link href={`/clients/${client.id}`}>View</Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8"
+                        asChild
                       >
-                        Edit
-                      </Link>
-                      <Link
-                        href={`/clients/${client.id}/invoices/new`}
-                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                        <Link href={`/clients/${client.id}/edit`}>Edit</Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8"
+                        asChild
                       >
-                        New Invoice
-                      </Link>
+                        <Link href={`/clients/${client.id}/invoices/new`}>
+                          New Invoice
+                        </Link>
+                      </Button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

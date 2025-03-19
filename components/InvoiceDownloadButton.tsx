@@ -1,8 +1,17 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Client, Invoice, InvoiceItem } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 import { useRef } from "react";
 
@@ -105,42 +114,42 @@ const InvoiceDownloadButton = ({
           </div>
 
           {/* Invoice Items */}
-          <table className="w-full mb-8 border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2 text-left">
+          <Table className="w-full mb-8 border-collapse">
+            <TableHeader>
+              <TableRow className="bg-gray-100">
+                <TableHead className="border border-gray-300 p-2 text-left">
                   Description
-                </th>
-                <th className="border border-gray-300 p-2 text-right">
+                </TableHead>
+                <TableHead className="border border-gray-300 p-2 text-right">
                   Quantity
-                </th>
-                <th className="border border-gray-300 p-2 text-right">
+                </TableHead>
+                <TableHead className="border border-gray-300 p-2 text-right">
                   Unit Price
-                </th>
-                <th className="border border-gray-300 p-2 text-right">
+                </TableHead>
+                <TableHead className="border border-gray-300 p-2 text-right">
                   Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {invoice.items.map((item, index) => (
-                <tr key={index}>
-                  <td className="border border-gray-300 p-2">
+                <TableRow key={index}>
+                  <TableCell className="border border-gray-300 p-2">
                     {item.description}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-right">
+                  </TableCell>
+                  <TableCell className="border border-gray-300 p-2 text-right">
                     {item.quantity}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-right">
+                  </TableCell>
+                  <TableCell className="border border-gray-300 p-2 text-right">
                     {formatCurrency(item.unit_price)}
-                  </td>
-                  <td className="border border-gray-300 p-2 text-right">
+                  </TableCell>
+                  <TableCell className="border border-gray-300 p-2 text-right">
                     {formatCurrency(item.amount)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
 
           {/* Totals */}
           <div className="flex justify-end mb-8">
@@ -179,10 +188,7 @@ const InvoiceDownloadButton = ({
         </div>
       </div>
 
-      <button
-        onClick={handleDownload}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200 flex items-center"
-      >
+      <Button onClick={handleDownload} className="flex items-center">
         {children || (
           <>
             <svg
@@ -196,13 +202,13 @@ const InvoiceDownloadButton = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
               />
             </svg>
-            Download PDF
+            Download Invoice
           </>
         )}
-      </button>
+      </Button>
     </>
   );
 };

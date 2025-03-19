@@ -1,11 +1,12 @@
 "use client";
 
 import SettingsForm from "@/components/SettingsForm";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Settings } from "@/lib/types";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { supabase, user } = useSupabase();
@@ -66,12 +67,9 @@ export default function SettingsPage() {
             <p className="text-red-500 mb-4">
               Failed to load settings. Please try again.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-            >
+            <Button onClick={() => window.location.reload()}>
               Refresh Page
-            </button>
+            </Button>
           </CardContent>
         </Card>
       )}

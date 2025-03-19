@@ -8,10 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSupabase } from "@/utils/supabase/use-supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 type FrequentClient = {
   id: string;
@@ -131,6 +139,9 @@ export default function DashboardQuickInvoice() {
           issue_date: issueDate,
           due_date: dueDateStr,
           status: "draft",
+          subtotal: 0,
+          tax_amount: 0,
+          discount_amount: 0,
           total_amount: 0,
         })
         .select()
@@ -174,12 +185,12 @@ export default function DashboardQuickInvoice() {
         <p className="text-sm mt-2 text-gray-400 dark:text-gray-500">
           Add clients to enable quick invoicing
         </p>
-        <button
+        <Button
           onClick={() => router.push("/clients/new")}
           className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
         >
           Add Client
-        </button>
+        </Button>
       </div>
     );
   }
@@ -192,28 +203,23 @@ export default function DashboardQuickInvoice() {
       <CardContent>
         <div className="space-y-4">
           <div>
-            <label
-              htmlFor="clientSelect"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Select Client
-            </label>
-            <select
-              id="clientSelect"
+            <Label htmlFor="clientSelect">Select Client</Label>
+            <Select
               value={selectedClientId}
-              onChange={(e) => setSelectedClientId(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              onValueChange={(value) => setSelectedClientId(value)}
               disabled={isCreating}
             >
-              <option value="" disabled>
-                Select a client
-              </option>
-              {frequentClients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a client" />
+              </SelectTrigger>
+              <SelectContent>
+                {frequentClients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Button
@@ -237,12 +243,13 @@ export default function DashboardQuickInvoice() {
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
           Need more options?
         </p>
-        <button
+        <Button
           onClick={() => router.push("/invoices/new")}
-          className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+          variant="link"
+          className="text-blue-600 dark:text-blue-400 text-sm"
         >
           Create Detailed Invoice →
-        </button>
+        </Button>
       </CardFooter>
     </Card>
   );

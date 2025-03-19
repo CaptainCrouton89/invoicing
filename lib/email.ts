@@ -84,11 +84,12 @@ export const sendInvoiceEmail = async (
           th {
             background-color: #f2f2f2;
             text-align: left;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
+            font-weight: 500;
           }
           td {
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
           }
           .totals {
@@ -109,6 +110,9 @@ export const sendInvoiceEmail = async (
             text-decoration: none;
             border-radius: 4px;
             margin-top: 20px;
+          }
+          tr:hover {
+            background-color: #f9f9f9;
           }
         </style>
       </head>
