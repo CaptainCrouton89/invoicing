@@ -1,5 +1,4 @@
 import { AnimatedGradient } from "@/components/ui/animated-gradient";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +20,8 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -42,23 +43,25 @@ export default function Home() {
           contractors.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <Button size="lg" className="gap-2">
-            Get Started (Free Forever) <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button size="lg" variant="outline">
-            See How It Works
+          <Button size="lg" asChild className="gap-2">
+            <Link href="/sign-up">
+              Get Started (Free Forever) <ChevronRight className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
-        <AnimatedGradient className="w-full mt-10 border shadow-md">
-          <AspectRatio ratio={16 / 9}>
-            <div className="bg-background/50 w-full h-full flex items-center justify-center">
-              <div className="px-6 py-12 rounded-lg bg-card border shadow-lg">
-                <span className="text-2xl font-semibold">
-                  Simple Dashboard Preview
-                </span>
-              </div>
+        <AnimatedGradient className="w-full mt-10 border shadow-md relative">
+          <div className="overflow-auto h-[40vh] md:h-[50vh]">
+            <div className="w-full h-auto min-h-full">
+              <Image
+                src="/demo.png"
+                alt="Invoice Example"
+                layout="responsive"
+                width={1600}
+                height={1000}
+                className="object-contain"
+              />
             </div>
-          </AspectRatio>
+          </div>
         </AnimatedGradient>
       </section>
 
