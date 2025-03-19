@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { SupabaseProvider } from "@/utils/supabase/supabase-provider";
 import { ThemeProvider } from "next-themes";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
@@ -47,14 +48,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster />
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1 w-full flex flex-col items-center">
-              <div className="container py-5">{children}</div>
-            </main>
-            <Footer />
-          </div>
+          <SupabaseProvider>
+            <Toaster />
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1 w-full flex flex-col items-center">
+                <div className="container py-5">{children}</div>
+              </main>
+              <Footer />
+            </div>
+          </SupabaseProvider>
         </ThemeProvider>
       </body>
     </html>
