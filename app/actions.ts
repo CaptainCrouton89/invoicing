@@ -29,7 +29,10 @@ export const signUpAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
+    return {
+      error: error.message,
+      email: formData.get("email") as string,
+    };
   } else {
     revalidatePath("/", "layout");
 
@@ -41,7 +44,7 @@ export const signUpAction = async (formData: FormData) => {
   }
 };
 
-export const signInAction = async (formData: FormData) => {
+export async function signInAction(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = await createClient();
@@ -52,12 +55,15 @@ export const signInAction = async (formData: FormData) => {
   });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    return {
+      error: error.message,
+      email: formData.get("email") as string,
+    };
   }
 
   revalidatePath("/", "layout");
   return redirect("/dashboard");
-};
+}
 
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();

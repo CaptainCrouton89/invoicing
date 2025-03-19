@@ -1,14 +1,54 @@
+"use client";
+
 import { signInAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useFormStatus } from "react-dom";
 
-export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
+// Client component for button with loading state
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
   return (
-    <form className="flex flex-col min-w-64 max-w-64 mx-auto">
+    <Button type="submit" disabled={pending}>
+      {pending ? "Signing in..." : "Sign in"}
+    </Button>
+  );
+}
+
+// Form component that uses client-side features
+function SignInForm({ searchParams }: { searchParams: Message }) {
+  const [email, setEmail] = useState("");
+
+  // Load email from localStorage on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("userEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  // Save email to localStorage when form is submitted
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const formData = new FormData(e.currentTarget);
+    const emailValue = formData.get("email") as string;
+    if (emailValue) {
+      localStorage.setItem("userEmail", emailValue);
+    }
+  };
+
+  return (
+    <form
+      className="flex flex-col min-w-64 max-w-64 mx-auto"
+      action={async (formData) => {
+        await signInAction(formData);
+      }}
+      onSubmit={handleSubmit}
+    >
       <h1 className="text-2xl font-medium">Sign in</h1>
       <p className="text-sm text-foreground">
         Don't have an account?{" "}
@@ -18,7 +58,13 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
       </p>
       <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
         <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
+        <Input
+          name="email"
+          placeholder="you@example.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <div className="flex justify-between items-center">
           <Label htmlFor="password">Password</Label>
           <Link
@@ -34,11 +80,16 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           placeholder="Your password"
           required
         />
-        <Button type="submit" formAction={signInAction}>
-          Sign in
-        </Button>
+        <SubmitButton />
         <FormMessage message={searchParams} />
       </div>
     </form>
   );
+}
+
+// Server component wrapper
+export default async function Login(props: { searchParams: Promise<Message> }) {
+  const searchParams = await props.searchParams;
+
+  return <SignInForm searchParams={searchParams} />;
 }
